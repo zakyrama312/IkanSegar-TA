@@ -11,6 +11,6 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     $_SESSION['pesan_error'] = "Anda harus login terlebih dahulu untuk mengakses halaman ini.";
 
     // Redirect ke login.php
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit; // Wajib memanggil exit setelah header agar eksekusi script selanjutnya dihentikan
 }
