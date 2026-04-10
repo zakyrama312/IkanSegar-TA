@@ -1,6 +1,9 @@
 <?php
 // components/sidebar.php
 if (!isset($halaman)) $halaman = '';
+
+// PENTING: Baris ini wajib ada agar sistem tahu siapa yang sedang login!
+$user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
 ?>
 <!-- Overlay Mobile -->
 <div id="sidebar-overlay" onclick="toggleSidebar()"
@@ -23,13 +26,14 @@ if (!isset($halaman)) $halaman = '';
     <!-- Profil Admin -->
     <div class="px-6 py-5 border-b border-slate-800 bg-slate-800/30 shrink-0">
         <div class="flex items-center gap-3">
-            <img src="https://ui-avatars.com/api/?name=<?= isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Kasir Utama'; ?>&background=3b82f6&color=fff"
+            <img src="https://ui-avatars.com/api/?name=<?= isset($_SESSION['nama_lengkap']) ? urlencode($_SESSION['nama_lengkap']) : 'Kasir+Utama'; ?>&background=3b82f6&color=fff"
                 class="w-10 h-10 rounded-full border-2 border-slate-700">
             <div>
-                <h4 class="text-sm font-bold text-gray-100">
-                    <?= isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Admin Utama'; ?></h4>
-                <p class="text-xs text-green-400 font-medium flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-green-400"></span> Online
+                <h4 class="text-sm font-bold text-gray-100 line-clamp-1">
+                    <?= isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Admin Utama'; ?>
+                </h4>
+                <p class="text-xs text-green-400 font-medium flex items-center gap-1 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span> <?= $user_role ? $user_role : 'Online'; ?>
                 </p>
             </div>
         </div>
@@ -54,63 +58,67 @@ if (!isset($halaman)) $halaman = '';
         </div>
 
         <!-- GRUP 2: MASTER DATA -->
-        <div class="mt-8 space-y-1">
-            <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Master Data</p>
+        <?php if ($user_role === 'admin'): ?>
+            <div class="mt-8 space-y-1">
+                <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Master Data</p>
 
-            <a href="kelola_karyawan.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
-                <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
-                </svg>
-                Kelola Karyawan
-            </a>
+                <a href="kelola_karyawan.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Kelola Karyawan
+                </a>
 
-            <a href="kelola_ikan.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'ikan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
-                <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-                Kelola Data Ikan
-            </a>
-        </div>
+                <a href="kelola_ikan.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'ikan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    Kelola Data Ikan
+                </a>
+            </div>
+        <?php endif; ?>
 
         <!-- GRUP 3: LAPORAN & HISTORI -->
-        <div class="mt-8 space-y-1">
-            <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Laporan Data</p>
+        <?php if ($user_role === 'admin' || $user_role === 'owner'): ?>
+            <div class="mt-8 space-y-1">
+                <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Laporan Data</p>
 
-            <a href="transaksi.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'transaksi' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
-                <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                </svg>
-                Laporan Transaksi
-            </a>
+                <a href="transaksi.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'transaksi' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Laporan Transaksi
+                </a>
 
-            <a href="riwayat_stok.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'riwayat_stok' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
-                <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2">
-                    </path>
-                </svg>
-                Riwayat Stok Masuk
-            </a>
+                <a href="riwayat_stok.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'riwayat_stok' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2">
+                        </path>
+                    </svg>
+                    Riwayat Stok Masuk
+                </a>
 
-            <a href="laporan_karyawan.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
-                <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                </svg>
-                Laporan Karyawan
-            </a>
-        </div>
+                <a href="laporan_karyawan.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Laporan Karyawan
+                </a>
+            </div>
+        <?php endif; ?>
     </nav>
 
     <!-- Tombol Logout -->

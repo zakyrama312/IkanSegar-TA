@@ -27,9 +27,11 @@ if (!isset($judul_halaman)) $judul_halaman = 'Panel Admin';
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online
         </span>
         <!-- Tombol Buka POS -->
-        <a href="../pos.php" target="_blank"
-            class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-100 transition-colors border border-blue-200 hidden sm:block">
-            Buka Kasir (POS)
-        </a>
+        <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'kasir'): ?>
+            <a href="../pos.php" target="_blank"
+                class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-100 transition-colors border border-blue-200 hidden sm:block">
+                Buka Kasir (POS)
+            </a>
+        <?php endif; ?>
     </div>
 </header>
