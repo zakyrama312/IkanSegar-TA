@@ -15,7 +15,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
 
     <!-- Logo Header -->
     <div class="h-20 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
-        <span class="text-2xl font-extrabold tracking-tight">Ikan<span class="text-blue-400">Segar</span>.</span>
+        <span class="text-2xl font-extrabold tracking-tight">Simabeni<span class="text-blue-400">Pangkah</span>.</span>
         <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -71,7 +71,15 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                     </svg>
                     Kelola Karyawan
                 </a>
-
+                <a href="pengeluaran.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'pengeluaran' ? 'bg-red-500 text-white shadow-md shadow-red-500/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Pengeluaran Toko
+                </a>
                 <a href="kelola_ikan.php"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'ikan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
                     <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,6 +96,16 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
             <div class="mt-8 space-y-1">
                 <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Laporan Data</p>
 
+                <a href="laporan_karyawan.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Laporan Karyawan
+                </a>
+
                 <a href="transaksi.php"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'transaksi' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
                     <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,6 +114,16 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                         </path>
                     </svg>
                     Laporan Transaksi
+                </a>
+
+                <a href="laporan_pembeli.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_pembeli' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                    <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    Laporan Pembeli
                 </a>
 
                 <a href="riwayat_stok.php"
@@ -108,14 +136,14 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                     Riwayat Stok Masuk
                 </a>
 
-                <a href="laporan_karyawan.php"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_karyawan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
+                <a href="laporan_keuangan.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors <?php echo $halaman == 'laporan_keuangan' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'; ?>">
                     <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
                         </path>
                     </svg>
-                    Laporan Karyawan
+                    Laporan Keuangan
                 </a>
             </div>
         <?php endif; ?>

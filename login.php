@@ -61,7 +61,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - IkanSegar Admin</title>
+    <title>Login - SimabeniPangkah Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -94,9 +94,9 @@ if (isset($_POST['login'])) {
                         </path>
                     </svg>
                 </div>
-                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Ikan<span
-                        class="text-blue-500">Segar</span>.</h1>
-                <p class="text-slate-500 mt-2 font-medium">Sistem Manajemen & Kasir (POS)</p>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Simabeni<span
+                        class="text-blue-500">Pangkah</span>.</h1>
+                <p class="text-slate-500 mt-2 font-medium">Sistem Informasi Manajemen Benih Ikan Pangkah</p>
             </div>
 
             <!-- Pesan Error (Tampil jika gagal login) -->

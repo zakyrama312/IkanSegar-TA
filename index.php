@@ -21,7 +21,7 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SegarLaut - Jual Ikan Segar Langsung dari Nelayan</title>
+    <title>SimabeniPangkah - Jual Ikan Segar Langsung dari Tambak</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -45,8 +45,8 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
             <div class="flex justify-between items-center h-20">
                 <!-- Logo -->
                 <a href="index.php" class="flex-shrink-0 flex items-center">
-                    <span class="text-3xl font-extrabold text-blue-600 tracking-tighter">Ikan<span
-                            class="text-sky-400">Segar</span>.</span>
+                    <span class="text-3xl font-extrabold text-blue-600 tracking-tighter">Simabeni<span
+                            class="text-sky-400">Pangkah</span>.</span>
                 </a>
 
                 <!-- Menu Links Desktop -->
@@ -260,7 +260,7 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
                 <span class="text-slate-600">•</span>
                 <a href="#" class="text-slate-400 hover:text-white transition-colors">Facebook</a>
             </div>
-            <p class="text-sm">&copy; <?php echo date('Y'); ?> IkanSegar. </p>
+            <p class="text-sm">&copy; <?php echo date('Y'); ?> SimabeniPangkah. </p>
         </div>
     </footer>
 

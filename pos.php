@@ -7,6 +7,11 @@ session_start();
 require_once 'koneksi.php';
 
 // Cek apakah user sudah login
+if (!isset($_SESSION['is_logged_in'])) {
+    header("Location: login.php");
+    exit;
+}
+
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
 
 // ===================================================================
@@ -15,6 +20,12 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
 if (isset($_POST['proses_bayar'])) {
     $keranjang_json = $_POST['data_keranjang'];
     $keranjang = json_decode($keranjang_json, true);
+
+    // Tangkap data nama pembeli (Jika kosong, set sebagai 'Pelanggan Umum')
+    $nama_pembeli = mysqli_real_escape_string($koneksi, trim($_POST['nama_pembeli']));
+    if (empty($nama_pembeli)) {
+        $nama_pembeli = 'Pelanggan Umum';
+    }
 
     // Hilangkan format Rupiah (Rp, titik, spasi)
     $jumlah_bayar_raw = preg_replace('/[^0-9]/', '', $_POST['jumlah_bayar_input']);
@@ -32,11 +43,13 @@ if (isset($_POST['proses_bayar'])) {
         if ($kembalian >= 0) {
             $kode_trx = 'TRX-' . date('Ymd-His');
 
-            $query_trx = "INSERT INTO transaksi (kode_transaksi, total_belanja, jumlah_bayar, kembalian, user_id) 
-                          VALUES ('$kode_trx', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
+            // Insert data transaksi beserta NAMA PEMBELI
+            $query_trx = "INSERT INTO transaksi (kode_transaksi, nama_pembeli, total_belanja, jumlah_bayar, kembalian, user_id) 
+                          VALUES ('$kode_trx', '$nama_pembeli', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
 
             if (mysqli_query($koneksi, $query_trx)) {
                 $transaksi_id = mysqli_insert_id($koneksi);
+                $items_struk = []; // Array untuk menampung detail cetak struk
 
                 foreach ($keranjang as $item) {
                     $id_ikan = $item['id'];
@@ -47,9 +60,29 @@ if (isset($_POST['proses_bayar'])) {
                     mysqli_query($koneksi, "INSERT INTO detail_transaksi (transaksi_id, ikan_id, qty, harga_satuan, subtotal) 
                                             VALUES ($transaksi_id, $id_ikan, $qty, $harga, $subtotal)");
                     mysqli_query($koneksi, "UPDATE ikan SET stok = stok - $qty WHERE id = $id_ikan");
+
+                    // Simpan ke array struk
+                    $items_struk[] = [
+                        'nama' => $item['nama'],
+                        'qty' => $qty,
+                        'harga' => $harga,
+                        'subtotal' => $subtotal
+                    ];
                 }
 
                 $_SESSION['pesan_sukses'] = "Transaksi <b>$kode_trx</b> Berhasil! Kembalian: " . formatRupiah($kembalian);
+
+                // Simpan data struk ke session untuk diprint di halaman
+                $_SESSION['struk_terakhir'] = [
+                    'kode' => $kode_trx,
+                    'kasir' => isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Kasir',
+                    'pembeli' => $nama_pembeli,
+                    'tanggal' => date('d M Y H:i:s'),
+                    'total' => $total_belanja,
+                    'bayar' => $jumlah_bayar,
+                    'kembali' => $kembalian,
+                    'items' => $items_struk
+                ];
             } else {
                 $_SESSION['pesan_error'] = "Gagal menyimpan transaksi: " . mysqli_error($koneksi);
             }
@@ -64,11 +97,15 @@ if (isset($_POST['proses_bayar'])) {
     exit;
 }
 
+// Ambil data produk Ikan
 $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 ORDER BY id DESC");
 $data_ikan_json = [];
 while ($row = mysqli_fetch_assoc($query_ikan)) {
     $data_ikan_json[] = $row;
 }
+
+// Ambil data riwayat pelanggan untuk fitur Auto-suggest (Datalist)
+$q_pelanggan = mysqli_query($koneksi, "SELECT DISTINCT nama_pembeli FROM transaksi WHERE nama_pembeli != 'Pelanggan Umum' AND nama_pembeli != '' ORDER BY nama_pembeli ASC");
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +114,7 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kasir (POS) - SegarLaut</title>
+    <title>Sistem Kasir (POS) - SimabeniPangkah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -110,10 +147,106 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
             -webkit-appearance: none;
             margin: 0;
         }
+
+        /* ========================================== */
+        /* CSS KHUSUS UNTUK CETAK STRUK THERMAL      */
+        /* ========================================== */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #area-struk,
+            #area-struk * {
+                visibility: visible;
+                color: #000 !important;
+            }
+
+            #area-struk {
+                position: absolute;
+                left: 0;
+                top: 0;
+                display: block !important;
+                width: 80mm !important;
+                /* Standar struk kasir 80mm */
+                padding: 10px !important;
+                margin: 0 !important;
+                font-family: monospace !important;
+            }
+
+            /* Hilangkan dekorasi Tailwind saat cetak */
+            #area-struk .border-dashed {
+                border-style: dashed !important;
+                border-width: 1px !important;
+                border-color: #000 !important;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800 antialiased h-screen overflow-hidden flex flex-col">
+
+    <!-- AREA STRUK TERSEMBUNYI (Hanya muncul saat print) -->
+    <?php if (isset($_SESSION['struk_terakhir'])):
+        $struk = $_SESSION['struk_terakhir'];
+        unset($_SESSION['struk_terakhir']); // Langsung hapus setelah di-render agar tidak print terus menerus
+    ?>
+        <div id="area-struk" class="hidden text-sm bg-white">
+            <div class="text-center mb-4">
+                <h2 class="font-bold text-2xl uppercase">SimabeniPangkah.</h2>
+                <p class="text-xs">Sistem Penjualan & POS</p>
+                <div class="border-b border-dashed border-black mt-3 mb-3"></div>
+            </div>
+            <div class="mb-3 text-xs leading-tight">
+                <p>No. Nota : <?php echo $struk['kode']; ?></p>
+                <p>Tanggal : <?php echo $struk['tanggal']; ?></p>
+                <p>Kasir : <?php echo $struk['kasir']; ?></p>
+                <p>Pembeli : <?php echo htmlspecialchars($struk['pembeli']); ?></p>
+            </div>
+            <div class="border-b border-dashed border-black mb-3"></div>
+
+            <table class="w-full text-xs mb-3">
+                <?php foreach ($struk['items'] as $item): ?>
+                    <tr>
+                        <td colspan="3" class="pb-1 font-bold"><?php echo $item['nama']; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="w-10"><?php echo $item['qty']; ?> x</td>
+                        <td class="text-right"><?php echo number_format($item['harga'], 0, ',', '.'); ?></td>
+                        <td class="text-right font-bold"><?php echo number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+
+            <div class="border-b border-dashed border-black mb-3"></div>
+            <div class="flex justify-between font-bold text-sm mb-1">
+                <span>TOTAL</span>
+                <span><?php echo number_format($struk['total'], 0, ',', '.'); ?></span>
+            </div>
+            <div class="flex justify-between text-xs mb-1">
+                <span>Tunai</span>
+                <span><?php echo number_format($struk['bayar'], 0, ',', '.'); ?></span>
+            </div>
+            <div class="flex justify-between text-xs font-bold mb-4">
+                <span>KEMBALI</span>
+                <span><?php echo number_format($struk['kembali'], 0, ',', '.'); ?></span>
+            </div>
+            <div class="text-center text-xs mt-6 mb-4">
+                <p>Terima Kasih Atas Kunjungan Anda</p>
+                <p class="mt-1">Barang yang dibeli tidak dapat ditukar/dikembalikan</p>
+            </div>
+        </div>
+
+        <!-- Script Pemicu Print Otomatis -->
+        <script>
+            window.addEventListener('DOMContentLoaded', (event) => {
+                setTimeout(() => {
+                    window.print();
+                }, 500); // Tunggu sebentar agar halaman termuat sempurna lalu print
+            });
+        </script>
+    <?php endif; ?>
+    <!-- AKHIR AREA STRUK -->
 
     <header class="bg-slate-900 text-white h-16 flex items-center justify-between px-6 shrink-0 shadow-md z-20">
         <div class="flex items-center gap-4">
@@ -123,7 +256,7 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
             </a>
-            <h1 class="text-xl font-bold tracking-tight">Segar<span class="text-blue-400">Laut</span> <span
+            <h1 class="text-xl font-bold tracking-tight">Simabeni<span class="text-blue-400">Pangkah</span> <span
                     class="font-normal text-slate-400">| POS System</span></h1>
         </div>
         <div class="flex items-center gap-4">
@@ -166,10 +299,27 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
         </div>
 
         <div class="flex-1 bg-gray-50 flex flex-col h-full border-r border-gray-200 z-10">
-            <div class="p-4 bg-white border-b border-gray-200 shrink-0">
-                <h2 class="text-lg font-bold text-gray-800">Menu Produk</h2>
-                <p class="text-xs text-gray-500">Klik produk untuk menambahkan ke keranjang.</p>
+
+            <!-- HEADER PRODUK DENGAN FITUR PENCARIAN -->
+            <div
+                class="p-4 bg-white border-b border-gray-200 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Menu Produk</h2>
+                    <p class="text-xs text-gray-500">Klik produk untuk menambahkan ke keranjang.</p>
+                </div>
+
+                <!-- Kotak Pencarian -->
+                <div class="relative w-full sm:w-1/2 lg:w-64 xl:w-80">
+                    <input type="text" id="input-pencarian" onkeyup="cariProduk()" placeholder="Cari nama ikan..."
+                        class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-transparent transition">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
             </div>
+
             <div class="flex-1 overflow-y-auto p-4">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4" id="grid-produk"></div>
             </div>
@@ -207,6 +357,24 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
                 </div>
 
                 <div class="space-y-4 mb-6">
+
+                    <!-- INPUT NAMA PELANGGAN (AUTO SUGGEST) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nama
+                            Pelanggan <span class="text-gray-400 font-normal capitalize">(Opsional)</span></label>
+                        <input type="text" name="nama_pembeli" list="data-pelanggan" autocomplete="off"
+                            placeholder="Ketik atau pilih nama..."
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+
+                        <!-- Datalist dari Database -->
+                        <datalist id="data-pelanggan">
+                            <?php if ($q_pelanggan): while ($pel = mysqli_fetch_assoc($q_pelanggan)): ?>
+                                    <option value="<?php echo htmlspecialchars($pel['nama_pembeli']); ?>"></option>
+                            <?php endwhile;
+                            endif; ?>
+                        </datalist>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Uang Diterima
                             (Rp)</label>
@@ -230,7 +398,7 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
 
                 <button type="submit" name="proses_bayar" id="btn-proses" disabled
                     class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                    Proses Transaksi Selesai
+                    Proses & Cetak Struk
                 </button>
             </form>
         </div>
@@ -249,6 +417,21 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
             }).format(angka);
         };
 
+        // FUNGSI PENCARIAN PRODUK
+        window.cariProduk = function() {
+            const kataKunci = document.getElementById('input-pencarian').value.toLowerCase();
+            const kartuProduk = document.querySelectorAll('.kartu-produk');
+
+            kartuProduk.forEach(kartu => {
+                const namaIkan = kartu.getAttribute('data-nama').toLowerCase();
+                if (namaIkan.includes(kataKunci)) {
+                    kartu.style.display = 'flex'; // Munculkan kembali (ingat kartu kita flex)
+                } else {
+                    kartu.style.display = 'none'; // Sembunyikan
+                }
+            });
+        }
+
         function renderProduk() {
             const grid = document.getElementById('grid-produk');
             grid.innerHTML = '';
@@ -264,9 +447,11 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
                     gambarSrc = 'uploads/' + gambarSrc;
                 }
 
+                // Tambahan: class "kartu-produk" dan "data-nama" untuk keperluan pencarian
                 const cardHTML = `
                     <div onclick="${isHabis ? '' : `tambahItem(${ikan.id})`}" 
-                         class="bg-white rounded-xl shadow-sm border ${isHabis ? 'border-gray-200 opacity-60 cursor-not-allowed' : 'border-gray-200 hover:border-blue-500 cursor-pointer hover:shadow-md'} overflow-hidden transition-all flex flex-col relative group">
+                         data-nama="${ikan.nama_ikan}"
+                         class="kartu-produk bg-white rounded-xl shadow-sm border ${isHabis ? 'border-gray-200 opacity-60 cursor-not-allowed' : 'border-gray-200 hover:border-blue-500 cursor-pointer hover:shadow-md'} overflow-hidden transition-all flex flex-col relative group">
                         <div class="h-28 bg-gray-100 overflow-hidden relative">
                             <img src="${gambarSrc}" onerror="this.src='https://via.placeholder.com/300?text=Ikan'" class="w-full h-full object-cover ${isHabis ? 'grayscale' : 'group-hover:scale-110 transition-transform duration-300'}">
                             <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
@@ -282,6 +467,9 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
                 `;
                 grid.innerHTML += cardHTML;
             });
+
+            // Panggil filter lagi kalau-kalau kursor masih ada di kolom search
+            cariProduk();
         }
 
         function tambahItem(id) {
@@ -402,7 +590,6 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
 
                     let imgUrl = item.gambar.startsWith('http') ? item.gambar : 'uploads/' + item.gambar;
 
-                    // PERUBAHAN: Penggunaan event oninput untuk Real-time typing
                     tempat.innerHTML += `
                         <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex gap-3 animate-fade-in">
                             <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/100'" class="w-12 h-12 rounded-lg object-cover bg-gray-100">

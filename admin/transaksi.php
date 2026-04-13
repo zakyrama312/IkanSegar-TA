@@ -354,7 +354,7 @@ include '../components/header.php';
 
                 <div class="overflow-y-auto flex-1 p-8 relative z-0">
                     <div class="text-center border-b-2 border-dashed border-gray-300 pb-6 mb-6">
-                        <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-1">IkanSegar.</h2>
+                        <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-1">SimabeniPangkah.</h2>
                         <p class="text-xs text-gray-500 font-medium">Ikan Segar Langsung dari Tambak</p>
                         <p class="text-xs text-gray-400 mt-1">Jl. Contoh Perikanan No. 123, Kota Laut</p>
                     </div>
@@ -450,7 +450,7 @@ include '../components/header.php';
                     extend: 'excelHtml5',
                     text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                    title: 'Laporan Penjualan IkanSegar',
+                    title: 'Laporan Penjualan Simabeni Pangkah',
                     exportOptions: {
                         columns: [0, 1, 2, 3, 4]
                     } // Jangan ikut sertakan kolom ke-6 (Tombol Detail)
@@ -459,7 +459,7 @@ include '../components/header.php';
                     extend: 'pdfHtml5',
                     text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
                     className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
-                    title: 'Laporan Penjualan IkanSegar',
+                    title: 'Laporan Penjualan Simabeni Pangkah',
                     customize: function(doc) {
                         // Kustomisasi layout PDF
                         doc.content[1].table.widths = ['25%', '25%', '20%', '15%', '15%'];

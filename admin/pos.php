@@ -138,7 +138,7 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
             </a>
-            <h1 class="text-xl font-bold tracking-tight">Segar<span class="text-blue-400">Laut</span> <span
+            <h1 class="text-xl font-bold tracking-tight">Simabeni<span class="text-blue-400">Pangkah</span> <span
                     class="font-normal text-slate-400">| POS System</span></h1>
         </div>
         <div class="flex items-center gap-4">
