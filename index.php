@@ -91,12 +91,12 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
                     id="slide-content-1">
                     <h1
                         class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-lg tracking-tight">
-                        Dari Tambak ke Akuarium Anda</h1>
-                    <p class="text-lg sm:text-xl text-slate-200 drop-shadow-md font-medium leading-relaxed">Kami
-                        menjamin kesegaran ikan tangkapan hari ini langsung dari nelayan lokal.</p>
+                        Dari Balai Benih ke Kolam Anda</h1>
+                    <p class="text-lg sm:text-xl text-slate-200 drop-shadow-md font-medium leading-relaxed">Benih Ikan
+                        Unggul Budidaya Sukses Hasil Produksi Benih.</p>
                     <a href="#katalog"
                         class="inline-block mt-8 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1">Lihat
-                        Hasil Tangkapan</a>
+                        Hasil</a>
                 </div>
             </div>
 
@@ -143,7 +143,7 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
                         $is_habis = $ikan['stok'] <= 0;
 
                         // Siapkan Pesan WhatsApp Pembelian
-                        $pesan_wa = "Halo admin SegarLaut, saya tertarik untuk membeli *" . $ikan['nama_ikan'] . "*. Apakah stoknya masih tersedia?";
+                        $pesan_wa = "Halo admin Simabeni, saya tertarik untuk membeli *" . $ikan['nama_ikan'] . "*. Apakah stoknya masih tersedia?";
                         $link_wa = "https://wa.me/" . $nomor_wa . "?text=" . urlencode($pesan_wa);
 
                         // Logika Gambar (Fallback jika file tidak ada)
