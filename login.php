@@ -174,7 +174,7 @@ if (isset($_POST['login'])) {
 
         <!-- Footer Login -->
         <div class="bg-slate-50 border-t border-slate-100 p-6 text-center">
-            <p class="text-sm text-slate-500">Kembali ke <a href="../index.php"
+            <p class="text-sm text-slate-500">Kembali ke <a href="index.php"
                     class="font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors">Katalog
                     Toko</a></p>
         </div>

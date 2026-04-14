@@ -8,7 +8,7 @@
 require_once 'koneksi.php';
 
 // Nomor WhatsApp Toko (Ganti dengan nomor asli Anda)
-$nomor_wa = "6285802908730";
+$nomor_wa = "6285225082736";
 
 // Query untuk mengambil data ikan dari database yang statusnya aktif (1)
 // Ikan yang disembunyikan oleh admin (status_aktif = 0) tidak akan tampil
@@ -85,14 +85,13 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
             <!-- Slide 1 -->
             <div class="carousel-slide absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center p-6 opacity-100 z-10"
                 id="slide-1">
-                <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=1600"
-                    class="absolute inset-0 w-full h-full object-cover z-0" alt="Banner 1">
+                <img src="image/tambak2.jpeg" class="absolute inset-0 w-full h-full object-cover z-0" alt="Banner 1">
                 <div class="absolute inset-0 bg-slate-900/60 z-0"></div>
                 <div class="relative z-20 max-w-3xl transform transition-transform duration-1000 translate-y-0 scale-100"
                     id="slide-content-1">
                     <h1
                         class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-lg tracking-tight">
-                        Laut ke Meja Makan Anda</h1>
+                        Dari Tambak ke Akuarium Anda</h1>
                     <p class="text-lg sm:text-xl text-slate-200 drop-shadow-md font-medium leading-relaxed">Kami
                         menjamin kesegaran ikan tangkapan hari ini langsung dari nelayan lokal.</p>
                     <a href="#katalog"
@@ -104,19 +103,19 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
             <!-- Slide 2 -->
             <div class="carousel-slide absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center p-6 opacity-0 z-0"
                 id="slide-2">
-                <img src="https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&q=80&w=1600"
-                    class="absolute inset-0 w-full h-full object-cover z-0" alt="Banner 2">
+                <img src="image/tambak3.jpeg" class="absolute inset-0 w-full h-full object-cover z-0" alt="Banner 2">
                 <div class="absolute inset-0 bg-slate-900/60 z-0"></div>
                 <div class="relative z-20 max-w-3xl transform transition-transform duration-1000 translate-y-8 scale-95"
                     id="slide-content-2">
                     <h1
                         class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-lg tracking-tight">
                         Kualitas Premium Terjaga</h1>
-                    <p class="text-lg sm:text-xl text-slate-200 drop-shadow-md font-medium leading-relaxed">Disortir
-                        dengan standar ketat untuk memberikan nutrisi terbaik bagi keluarga Anda.</p>
+                    <p class="text-lg sm:text-xl text-slate-200 drop-shadow-md font-medium leading-relaxed">Ikan
+                        dibesarkan di lingkungan air bersih dan disortir dengan standar ketat untuk nutrisi terbaik
+                        keluarga Anda.</p>
                     <a href="#katalog"
                         class="inline-block mt-8 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1">Lihat
-                        Hasil Tangkapan</a>
+                        Hasil Panen</a>
                 </div>
             </div>
         </section>
@@ -248,18 +247,19 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
     <!-- ================= FOOTER ================= -->
     <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl font-bold text-white mb-4 tracking-tighter">Ikan<span class="text-sky-400">Segar</span>.
+            <h2 class="text-2xl font-bold text-white mb-4 tracking-tighter">Simabeni<span
+                    class="text-sky-400">Pangkah</span>.
             </h2>
             <p class="mb-6 max-w-md mx-auto">Platform penjualan ikan segar terpercaya. Dapatkan ikan berkualitas tinggi
                 langsung dari tambak dengan harga terbaik.</p>
-            <div class="flex justify-center space-x-4 mb-8">
+            <!-- <div class="flex justify-center space-x-4 mb-8">
                 <a href="#" class="text-slate-400 hover:text-white transition-colors">Instagram</a>
                 <span class="text-slate-600">•</span>
                 <a href="https://wa.me/<?php echo $nomor_wa; ?>"
                     class="text-slate-400 hover:text-white transition-colors">WhatsApp</a>
                 <span class="text-slate-600">•</span>
                 <a href="#" class="text-slate-400 hover:text-white transition-colors">Facebook</a>
-            </div>
+            </div> -->
             <p class="text-sm">&copy; <?php echo date('Y'); ?> SimabeniPangkah. </p>
         </div>
     </footer>
