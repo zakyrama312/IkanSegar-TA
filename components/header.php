@@ -1,7 +1,6 @@
 <?php
 // components/header.php
 // File ini khusus untuk kerangka atas HTML (Head)
-require_once '../cek_login.php';
 if (!isset($judul_halaman)) $judul_halaman = 'Panel Admin';
 ?>
 <!DOCTYPE html>
@@ -37,7 +36,34 @@ if (!isset($judul_halaman)) $judul_halaman = 'Panel Admin';
                 transform: translateX(0);
             }
         }
+
+        /* ========================================================
+           KUSTOMISASI SCROLLBAR GLOBAL AGAR TIPIS & ELEGAN
+           ======================================================== */
+        ::-webkit-scrollbar {
+            width: 5px;
+            /* Lebar scrollbar vertikal */
+            height: 5px;
+            /* Tinggi scrollbar horizontal */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            /* Background track transparan */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            /* Warna thumb abu-abu semi-transparan */
+            border-radius: 10px;
+            /* Ujung scrollbar membulat */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.8);
+            /* Warna thumb saat disorot mouse */
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 antialiased overflow-hidden flex h-screen"></body>
+<body class="bg-gray-50 text-gray-800 antialiased overflow-hidden flex h-screen">

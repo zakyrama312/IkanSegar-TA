@@ -1,5 +1,5 @@
 <?php
-// admin/pembeli.php
+// admin/kelola_pembeli.php
 session_start();
 require_once '../koneksi.php';
 
@@ -25,7 +25,7 @@ if (isset($_POST['tambah_pembeli'])) {
     } else {
         $_SESSION['pesan_error'] = "Gagal menambahkan pelanggan: " . mysqli_error($koneksi);
     }
-    header("Location: pembeli.php");
+    header("Location: kelola_pembeli.php");
     exit;
 }
 
@@ -49,7 +49,7 @@ if (isset($_POST['edit_pembeli'])) {
     } else {
         $_SESSION['pesan_error'] = "Gagal memperbarui data: " . mysqli_error($koneksi);
     }
-    header("Location: pembeli.php");
+    header("Location: kelola_pembeli.php");
     exit;
 }
 
@@ -60,7 +60,7 @@ if (isset($_GET['hapus'])) {
     $id_hapus = (int)$_GET['hapus'];
     mysqli_query($koneksi, "DELETE FROM pembeli WHERE id = $id_hapus");
     $_SESSION['pesan_sukses'] = "Data pelanggan berhasil dihapus!";
-    header("Location: pembeli.php");
+    header("Location: kelola_pembeli.php");
     exit;
 }
 
@@ -257,7 +257,7 @@ include '../components/header.php';
                                                     </path>
                                                 </svg>
                                             </button>
-                                            <a href="pembeli.php?hapus=<?php echo $row['id']; ?>"
+                                            <a href="kelola_pembeli.php?hapus=<?php echo $row['id']; ?>"
                                                 onclick="return confirm('Yakin ingin menghapus data pelanggan ini?');"
                                                 class="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition"
                                                 title="Hapus">
@@ -294,7 +294,7 @@ include '../components/header.php';
                                 d="M6 18L18 6M6 6l12 12"></path>
                         </svg></button>
                 </div>
-                <form action="pembeli.php" method="POST" class="p-6">
+                <form action="kelola_pembeli.php" method="POST" class="p-6">
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
@@ -338,7 +338,7 @@ include '../components/header.php';
                                 d="M6 18L18 6M6 6l12 12"></path>
                         </svg></button>
                 </div>
-                <form action="pembeli.php" method="POST" class="p-6">
+                <form action="kelola_pembeli.php" method="POST" class="p-6">
                     <input type="hidden" name="edit_id" id="input_edit_id">
                     <div class="space-y-4">
                         <div>

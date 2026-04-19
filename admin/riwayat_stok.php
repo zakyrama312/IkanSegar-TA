@@ -6,48 +6,64 @@ require_once '../koneksi.php';
 // ========================================================
 // KONFIGURASI HALAMAN
 // ========================================================
+// Biarkan $halaman tetap 'riwayat_stok' agar sorotan menu di sidebar tetap menyala
 $halaman = 'riwayat_stok';
-$judul_halaman = 'Laporan Riwayat Stok Masuk';
+$judul_halaman = 'Laporan Data Ikan (Rekap Stok)';
 
 // ========================================================
-// 1. AMBIL DATA RINGKASAN (LAPORAN HARI INI & BULAN INI)
-// ========================================================
-$hari_ini = date('Y-m-d');
-$bulan_ini = date('Y-m');
-
-// Total Ikan & Aktivitas Hari Ini
-$q_hari_ini = mysqli_query($koneksi, "SELECT SUM(jumlah_tambah) as total_ikan, COUNT(id) as total_aktivitas FROM riwayat_stok WHERE DATE(tanggal_tambah) = '$hari_ini'");
-$data_hari_ini = mysqli_fetch_assoc($q_hari_ini);
-$ikan_hari_ini = $data_hari_ini['total_ikan'] ? $data_hari_ini['total_ikan'] : 0;
-$aktivitas_hari_ini = $data_hari_ini['total_aktivitas'] ? $data_hari_ini['total_aktivitas'] : 0;
-
-// Total Ikan Bulan Ini
-$q_bulan_ini = mysqli_query($koneksi, "SELECT SUM(jumlah_tambah) as total_ikan FROM riwayat_stok WHERE DATE_FORMAT(tanggal_tambah, '%Y-%m') = '$bulan_ini'");
-$data_bulan_ini = mysqli_fetch_assoc($q_bulan_ini);
-$ikan_bulan_ini = $data_bulan_ini['total_ikan'] ? $data_bulan_ini['total_ikan'] : 0;
-
-// ========================================================
-// 2. LOGIKA FILTER TANGGAL
+// LOGIKA FILTER TANGGAL
 // ========================================================
 $filter_mulai = isset($_GET['tgl_mulai']) ? mysqli_real_escape_string($koneksi, $_GET['tgl_mulai']) : '';
 $filter_selesai = isset($_GET['tgl_selesai']) ? mysqli_real_escape_string($koneksi, $_GET['tgl_selesai']) : '';
 
-$where_clause = "";
+$where_riwayat = "";
+$where_trx = "";
 if (!empty($filter_mulai) && !empty($filter_selesai)) {
-    // Tambahkan kondisi WHERE jika form filter disubmit
-    $where_clause = " WHERE DATE(r.tanggal_tambah) BETWEEN '$filter_mulai' AND '$filter_selesai' ";
+    // Filter untuk tabel riwayat_stok (Stok Masuk)
+    $where_riwayat = " AND DATE(tanggal_tambah) BETWEEN '$filter_mulai' AND '$filter_selesai' ";
+    // Filter untuk tabel transaksi (Stok Keluar)
+    $where_trx = " AND DATE(t.tanggal_waktu) BETWEEN '$filter_mulai' AND '$filter_selesai' ";
 }
 
 // ========================================================
-// 3. AMBIL DATA RIWAYAT STOK (DENGAN FILTER)
+// AMBIL DATA REKAPITULASI (PER IKAN)
 // ========================================================
-$query_riwayat = mysqli_query($koneksi, "
-    SELECT r.*, i.nama_ikan, i.satuan 
-    FROM riwayat_stok r 
-    LEFT JOIN ikan i ON r.ikan_id = i.id 
-    $where_clause
-    ORDER BY r.tanggal_tambah DESC
+// Query ini akan menghitung Total Masuk, Total Keluar, dan Tanggal Terakhir Masuk untuk setiap ikan
+$query_laporan = mysqli_query($koneksi, "
+    SELECT 
+        i.id,
+        i.nama_ikan,
+        i.satuan,
+        i.stok as stok_sekarang,
+        (SELECT SUM(jumlah_tambah) FROM riwayat_stok WHERE ikan_id = i.id $where_riwayat) as total_masuk,
+        (SELECT SUM(dt.qty) FROM detail_transaksi dt JOIN transaksi t ON dt.transaksi_id = t.id WHERE dt.ikan_id = i.id $where_trx) as total_keluar,
+        (SELECT MAX(tanggal_tambah) FROM riwayat_stok WHERE ikan_id = i.id $where_riwayat) as tgl_terakhir_masuk
+    FROM ikan i
+    ORDER BY i.nama_ikan DESC
 ");
+
+// Variabel untuk menampung total di kartu atas
+$total_semua_masuk = 0;
+$total_semua_keluar = 0;
+$total_semua_stok = 0;
+
+$data_tabel = [];
+
+if ($query_laporan) {
+    while ($row = mysqli_fetch_assoc($query_laporan)) {
+        $masuk = $row['total_masuk'] ? $row['total_masuk'] : 0;
+        $keluar = $row['total_keluar'] ? $row['total_keluar'] : 0;
+        $stok_saat_ini = $row['stok_sekarang'];
+
+        $total_semua_masuk += $masuk;
+        $total_semua_keluar += $keluar;
+        $total_semua_stok += $stok_saat_ini;
+
+        $row['masuk'] = $masuk;
+        $row['keluar'] = $keluar;
+        $data_tabel[] = $row;
+    }
+}
 
 // PANGGIL HEADER HTML
 include '../components/header.php';
@@ -143,27 +159,28 @@ include '../components/header.php';
                 <div
                     class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
                 </div>
-                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Total Ikan Masuk Hari Ini</p>
-                <h3 class="text-3xl font-extrabold text-emerald-600 relative z-10">
-                    <?php echo number_format($ikan_hari_ini, 0, ',', '.'); ?> <span
+                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Total Stok Masuk (Periode)</p>
+                <h3 class="text-3xl font-extrabold text-emerald-600 relative z-10">+
+                    <?php echo number_format($total_semua_masuk, 0, ',', '.'); ?> <span
                         class="text-sm font-medium text-emerald-400">Unit</span></h3>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-100 relative overflow-hidden group">
+                <div
+                    class="absolute right-0 top-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
+                </div>
+                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Total Stok Keluar/Terjual (Periode)</p>
+                <h3 class="text-3xl font-extrabold text-red-500 relative z-10">-
+                    <?php echo number_format($total_semua_keluar, 0, ',', '.'); ?> <span
+                        class="text-sm font-medium text-red-400">Unit</span></h3>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-blue-100 relative overflow-hidden group">
                 <div
                     class="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
                 </div>
-                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Aktivitas Restock Hari Ini</p>
-                <h3 class="text-3xl font-extrabold text-blue-600 relative z-10"><?php echo $aktivitas_hari_ini; ?> <span
-                        class="text-sm font-medium text-gray-400">Kali</span></h3>
-            </div>
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-amber-100 relative overflow-hidden group">
-                <div
-                    class="absolute right-0 top-0 w-24 h-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
-                </div>
-                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Total Ikan Masuk Bulan Ini</p>
-                <h3 class="text-3xl font-extrabold text-amber-600 relative z-10">
-                    <?php echo number_format($ikan_bulan_ini, 0, ',', '.'); ?> <span
-                        class="text-sm font-medium text-amber-400">Unit</span></h3>
+                <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">Total Stok Tersedia Saat Ini</p>
+                <h3 class="text-3xl font-extrabold text-blue-600 relative z-10">
+                    <?php echo number_format($total_semua_stok, 0, ',', '.'); ?> <span
+                        class="text-sm font-medium text-blue-400">Unit</span></h3>
             </div>
         </div>
 
@@ -204,66 +221,104 @@ include '../components/header.php';
         </div>
 
         <!-- ============================================== -->
-        <!-- TABEL RIWAYAT STOK                             -->
+        <!-- TABEL LAPORAN DATA IKAN                        -->
         <!-- ============================================== -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-10">
             <div
                 class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">
-                        Catatan Riwayat Stok Masuk
+                        Rekapitulasi Laporan Data Ikan
                         <?php if (!empty($filter_mulai)): ?>
                             <span
                                 class="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-2 border border-blue-100">
-                                (Filter: <?php echo date('d/m/Y', strtotime($filter_mulai)); ?> -
+                                (Periode: <?php echo date('d/m/Y', strtotime($filter_mulai)); ?> -
                                 <?php echo date('d/m/Y', strtotime($filter_selesai)); ?>)
                             </span>
                         <?php endif; ?>
                     </h2>
-                    <p class="text-sm text-gray-500">Semua aktivitas penambahan stok ikan (restock) tercatat di sini.
-                    </p>
+                    <p class="text-sm text-gray-500">Mencatat akumulasi stok masuk dan stok yang berhasil terjual.</p>
                 </div>
             </div>
 
             <div class="overflow-x-auto w-full">
                 <!-- Tabel ditambahkan id agar dikenali DataTables -->
-                <table id="tabel-riwayat-stok" class="w-full text-left whitespace-nowrap">
+                <table id="tabel-laporan-ikan" class="w-full text-left whitespace-nowrap">
                     <thead>
-                        <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                            <th class="p-4 font-semibold">Tanggal & Waktu</th>
+                        <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-4 font-semibold text-center w-16">No</th>
+
+                            <th class="p-4 font-semibold">Tgl Terakhir Masuk</th>
                             <th class="p-4 font-semibold">Nama Produk</th>
-                            <th class="p-4 font-semibold">Jumlah Ditambah</th>
-                            <th class="p-4 font-semibold">Keterangan / Catatan</th>
+                            <th class="p-4 font-semibold text-center">Stok Masuk (+)</th>
+                            <th class="p-4 font-semibold text-center">Stok Keluar (-)</th>
+                            <th class="p-4 font-semibold text-center">Sisa Saat Ini</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm text-gray-700">
-                        <?php if ($query_riwayat && mysqli_num_rows($query_riwayat) > 0): ?>
-                            <?php while ($row = mysqli_fetch_assoc($query_riwayat)): ?>
+                        <?php if (!empty($data_tabel)) { ?>
+                            <?php $no = 1;
+                            foreach ($data_tabel as $row) { ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
-                                    <td class="p-4 text-left text-gray-500"
-                                        data-order="<?php echo strtotime($row['tanggal_tambah']); ?>">
-                                        <span
-                                            class="font-bold text-gray-800 block"><?php echo date('d M Y', strtotime($row['tanggal_tambah'])); ?></span>
-                                        <span class="text-xs"><?php echo date('H:i:s', strtotime($row['tanggal_tambah'])); ?>
-                                            WIB</span>
+                                    <td class="p-4 text-gray-500 font-medium"><?php echo $no++; ?></td>
+                                    <!-- Kolom Tgl Terakhir Masuk Baru -->
+                                    <td class="p-4 text-gray-500 text-xs"
+                                        data-order="<?php echo $row['tgl_terakhir_masuk'] ? strtotime($row['tgl_terakhir_masuk']) : 0; ?>">
+                                        <?php echo $row['tgl_terakhir_masuk'] ? date('d M Y, H:i', strtotime($row['tgl_terakhir_masuk'])) : '<span class="italic text-gray-400">-</span>'; ?>
                                     </td>
                                     <td class="p-4 font-bold text-blue-600">
-                                        <?php echo $row['nama_ikan'] ? htmlspecialchars($row['nama_ikan']) : '<i class="text-red-500 font-normal">Ikan Terhapus</i>'; ?>
+                                        <?php echo htmlspecialchars($row['nama_ikan']); ?>
                                     </td>
-                                    <td class="p-4">
+
+
+
+                                    <!-- Kolom Stok Masuk -->
+                                    <td class="p-4 text-center" data-order="<?php echo $row['masuk']; ?>">
                                         <span
-                                            class="inline-flex px-3 py-1 items-center rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                                            + <?php echo number_format($row['jumlah_tambah'], 0, ',', '.'); ?>
+                                            class="inline-flex px-3 py-1 items-center rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-sm text-xs">
+                                            + <?php echo number_format($row['masuk'], 0, ',', '.'); ?>
                                             <?php echo $row['satuan']; ?>
                                         </span>
                                     </td>
-                                    <td class="p-4 text-gray-600 italic">
-                                        <?php echo htmlspecialchars($row['keterangan'] ? $row['keterangan'] : '-'); ?>
+
+                                    <!-- Kolom Stok Keluar -->
+                                    <td class="p-4 text-center" data-order="<?php echo $row['keluar']; ?>">
+                                        <span
+                                            class="inline-flex px-3 py-1 items-center rounded-lg bg-red-50 text-red-600 font-bold border border-red-100 shadow-sm text-xs">
+                                            - <?php echo number_format($row['keluar'], 0, ',', '.'); ?>
+                                            <?php echo $row['satuan']; ?>
+                                        </span>
+                                    </td>
+
+                                    <!-- Kolom Sisa Saat Ini -->
+                                    <td class="p-4 text-center" data-order="<?php echo $row['stok_sekarang']; ?>">
+                                        <span
+                                            class="inline-flex px-3 py-1.5 items-center rounded-lg <?php echo $row['stok_sekarang'] <= 0 ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-700'; ?> font-black border border-blue-100 shadow-sm text-sm">
+                                            <?php echo number_format($row['stok_sekarang'], 0, ',', '.'); ?>
+                                            <?php echo $row['satuan']; ?>
+                                        </span>
                                     </td>
                                 </tr>
-                            <?php endwhile; ?>
-                        <?php endif; ?>
+                        <?php }
+                        } ?>
                     </tbody>
+
+                    <!-- Footer Total -->
+                    <?php if (!empty($data_tabel)): ?>
+                        <tfoot class="bg-gray-50 font-bold">
+                            <tr>
+                                <!-- Colspan diubah dari 2 menjadi 3 karena ada tambahan kolom tanggal -->
+                                <td colspan="3" class="p-4 text-right text-gray-600 uppercase tracking-wider text-xs">Total
+                                    Keseluruhan:</td>
+                                <td class="p-4 text-center text-emerald-600">+
+                                    <?php echo number_format($total_semua_masuk, 0, ',', '.'); ?></td>
+                                <td class="p-4 text-center text-red-500">-
+                                    <?php echo number_format($total_semua_keluar, 0, ',', '.'); ?></td>
+                                <td class="p-4 text-center text-blue-600 border-t-2 border-blue-500">
+                                    <?php echo number_format($total_semua_stok, 0, ',', '.'); ?></td>
+                            </tr>
+                        </tfoot>
+                    <?php endif; ?>
                 </table>
             </div>
         </div>
@@ -284,35 +339,56 @@ include '../components/header.php';
 
 <script>
     $(document).ready(function() {
-        $('#tabel-riwayat-stok').DataTable({
+        // Deklarasikan instance DataTables ke dalam variabel agar bisa dipanggil event listnernya nanti
+        var table = $('#tabel-laporan-ikan').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             },
+            // PENTING: Matikan order dan search pada kolom index ke 0 (Kolom No) agar urutan angkanya tidak kacau
+            columnDefs: [{
+                searchable: false,
+                orderable: false,
+                targets: 0
+            }],
             order: [
-                [0, 'desc']
-            ], // Urutkan Tanggal terbaru (berdasarkan data-order timestamp)
-            pageLength: 15,
+                [1, 'asc']
+            ], // Urutkan berdasarkan Nama Produk Abjad (A-Z)
+            pageLength: 25,
             // Modifikasi DOM DataTables untuk menyisipkan tombol Export
             dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
             buttons: [{
                     extend: 'excelHtml5',
                     text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                    title: 'Laporan Riwayat Stok SegarLaut'
+                    title: 'Laporan Data Ikan SegarLaut',
+                    footer: true
                 },
                 {
                     extend: 'pdfHtml5',
                     text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
                     className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
-                    title: 'Laporan Riwayat Stok SegarLaut',
+                    title: 'Laporan Data Ikan SegarLaut',
+                    footer: true,
                     customize: function(doc) {
-                        // Kustomisasi layout PDF: Tanggal 25%, Produk 30%, Jumlah 15%, Keterangan 30%
-                        doc.content[1].table.widths = ['25%', '30%', '15%', '30%'];
+                        // Kustomisasi layout PDF untuk mengakomodasi 6 kolom (Total 100%)
+                        doc.content[1].table.widths = ['5%', '30%', '20%', '15%', '15%', '15%'];
                         doc.defaultStyle.fontSize = 10;
                     }
                 }
             ]
         });
+
+        // RE-NUMBERING SCRIPT
+        // Setiap kali DataTables di-sort atau di-search, kolom 'No' (index 0) akan di-reset ulang dari angka 1
+        table.on('order.dt search.dt', function() {
+            let i = 1;
+            table.cells(null, 0, {
+                search: 'applied',
+                order: 'applied'
+            }).every(function(cell) {
+                this.data(i++);
+            });
+        }).draw();
     });
 </script>
 

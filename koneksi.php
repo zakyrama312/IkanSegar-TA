@@ -1,13 +1,13 @@
 <?php
 // koneksi.php
-// if (session_status() === PHP_SESSION_NONE) {
-session_start();
-// }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_ikan";
+$db   = "ikansegar_db";
 
 // Melakukan koneksi ke MySQL
 $koneksi = mysqli_connect($host, $user, $pass, $db);

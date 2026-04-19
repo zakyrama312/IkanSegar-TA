@@ -59,7 +59,7 @@ $query_arus_kas = "
     LEFT JOIN users u ON p.user_id = u.id 
     $where_peng
 
-    ORDER BY waktu DESC
+    ORDER BY waktu ASC
 ";
 
 $result = mysqli_query($koneksi, $query_arus_kas);
@@ -235,7 +235,7 @@ include '../components/header.php';
         </div>
 
         <!-- ============================================== -->
-        <!-- TABEL Laporan (LAPORAN KEUANGAN)              -->
+        <!-- TABEL Laporan (LAPORAN KEUANGAN)               -->
         <!-- ============================================== -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-10">
             <div
@@ -294,10 +294,8 @@ include '../components/header.php';
                                     <td class="p-4 text-center text-gray-500">
                                         <?php echo date('d/m/Y H:i', strtotime($row['waktu'])); ?>
                                     </td>
-
                                     <td class="p-4 font-bold text-gray-800">
                                         <?php
-                                        // Beri warna ikon berbeda untuk Pemasukan dan Pengeluaran
                                         if ($row['masuk'] > 0) {
                                             echo '<span class="text-blue-500 mr-1">↓</span> ' . $row['keterangan'];
                                         } else {
@@ -305,25 +303,23 @@ include '../components/header.php';
                                         }
                                         ?>
                                     </td>
-
                                     <td class="p-4 text-center text-xs text-gray-500 font-medium">
                                         <?php echo htmlspecialchars($row['pembuat'] ?? 'Sistem'); ?>
                                     </td>
-
                                     <td class="p-4 text-right font-bold text-blue-600">
                                         <?php echo $row['masuk'] > 0 ? formatRupiah($row['masuk']) : '-'; ?>
                                     </td>
-
                                     <td class="p-4 text-right font-bold text-red-500">
                                         <?php echo $row['keluar'] > 0 ? formatRupiah($row['keluar']) : '-'; ?>
                                     </td>
-
                                     <td class="p-4 text-right font-black text-emerald-600">
                                         <?php echo formatRupiah($row['saldo']); ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
+                            <!-- Hapus colspan karena DataTables akan otomatis membuat "No data available" secara cerdas -->
+                            <!-- Tapi untuk aman di PHP, jika empty: -->
                             <tr>
                                 <td colspan="7" class="p-8 text-center text-gray-500 italic">Belum ada data keuangan pada
                                     periode ini.</td>
@@ -331,21 +327,19 @@ include '../components/header.php';
                         <?php endif; ?>
                     </tbody>
 
-                    <!-- FOOTER TABEL -->
-                    <?php if (!empty($data_tabel)): ?>
-                        <tfoot class="bg-gray-50 font-bold">
-                            <tr>
-                                <td colspan="4" class="p-4 text-right text-gray-600 uppercase tracking-wider text-xs">Total
-                                    Mutasi Periode Ini:</td>
-                                <td class="p-4 text-right text-blue-600"><?php echo formatRupiah($total_masuk_periode); ?>
-                                </td>
-                                <td class="p-4 text-right text-red-500"><?php echo formatRupiah($total_keluar_periode); ?>
-                                </td>
-                                <td class="p-4 text-right text-emerald-600 border-t-2 border-emerald-500">
-                                    <?php echo formatRupiah($saldo_akhir); ?></td>
-                            </tr>
-                        </tfoot>
-                    <?php endif; ?>
+                    <!-- FOOTER TABEL (Selalu tampil agar fitur export dataTables tidak error/crash ketika datanya kosong) -->
+                    <tfoot class="bg-gray-50 font-bold">
+                        <tr>
+                            <td colspan="4" class="p-4 text-right text-gray-600 uppercase tracking-wider text-xs">Total
+                                Mutasi Periode Ini:</td>
+                            <td class="p-4 text-right text-blue-600"><?php echo formatRupiah($total_masuk_periode); ?>
+                            </td>
+                            <td class="p-4 text-right text-red-500"><?php echo formatRupiah($total_keluar_periode); ?>
+                            </td>
+                            <td class="p-4 text-right text-emerald-600 border-t-2 border-emerald-500">
+                                <?php echo formatRupiah($saldo_akhir); ?></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -370,7 +364,7 @@ include '../components/header.php';
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             },
-            ordering: false, // PENTING: Sorting dimatikan agar urutan Saldo Berjalan tidak rusak saat diklik
+            ordering: false, // PENTING: Sorting dimatikan agar urutan Saldo Berjalan tidak rusak
             pageLength: 25,
             dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
             buttons: [{
@@ -385,12 +379,15 @@ include '../components/header.php';
                     text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
                     className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
                     title: 'Laporan Keuangan Simabeni Pangkah',
-                    orientation: 'landscape', // Kertas landscape agar muat banyak kolom
+                    orientation: 'landscape', // Kertas landscape
                     pageSize: 'A4',
                     footer: true,
                     customize: function(doc) {
-                        // Atur lebar kolom PDF: Waktu, Ket, Pencatat, Masuk, Keluar, Saldo
-                        doc.content[1].table.widths = ['15%', '30%', '10%', '15%', '15%', '15%'];
+                        // PERBAIKAN DI SINI: Array widths diubah menjadi 7 sesuai dengan jumlah total kolom (100%)
+                        // No 5%, Waktu 15%, Keterangan 25%, Pencatat 10%, Masuk 15%, Keluar 15%, Saldo 15%
+                        doc.content[1].table.widths = ['5%', '15%', '25%', '10%', '15%', '15%',
+                            '15%'
+                        ];
                         doc.defaultStyle.fontSize = 10;
                     }
                 }

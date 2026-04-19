@@ -54,71 +54,71 @@ include '../components/header.php';
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
 <style>
-.dataTables_wrapper {
-    padding: 1.5rem;
-}
+    .dataTables_wrapper {
+        padding: 1.5rem;
+    }
 
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    padding: 0.35rem 0.75rem;
-    margin-left: 0.5rem;
-    outline: none;
-    transition: all 0.2s;
-}
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.35rem 0.75rem;
+        margin-left: 0.5rem;
+        outline: none;
+        transition: all 0.2s;
+    }
 
-.dataTables_wrapper .dataTables_filter input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
 
-.dataTables_wrapper .dataTables_length select {
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    padding: 0.25rem 1rem 0.25rem 0.5rem;
-    outline: none;
-}
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.25rem 1rem 0.25rem 0.5rem;
+        outline: none;
+    }
 
-/* Pagination Styling */
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #3b82f6 !important;
-    color: white !important;
-    border: 1px solid #3b82f6 !important;
-    border-radius: 0.5rem;
-}
+    /* Pagination Styling */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #3b82f6 !important;
+        color: white !important;
+        border: 1px solid #3b82f6 !important;
+        border-radius: 0.5rem;
+    }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    border-radius: 0.5rem;
-    margin: 0 2px;
-}
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 0.5rem;
+        margin: 0 2px;
+    }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #eff6ff !important;
-    color: #1d4ed8 !important;
-    border: 1px solid #bfdbfe !important;
-}
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #eff6ff !important;
+        color: #1d4ed8 !important;
+        border: 1px solid #bfdbfe !important;
+    }
 
-/* Hilangkan styling bawaan tombol export DataTables agar bisa pakai Tailwind */
-button.dt-button {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin-right: 0.5rem !important;
-}
+    /* Hilangkan styling bawaan tombol export DataTables agar bisa pakai Tailwind */
+    button.dt-button {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-right: 0.5rem !important;
+    }
 
-button.dt-button:hover:not(.disabled) {
-    background: none !important;
-    border: none !important;
-}
+    button.dt-button:hover:not(.disabled) {
+        background: none !important;
+        border: none !important;
+    }
 
-table.dataTable.no-footer {
-    border-bottom: 1px solid #f1f5f9;
-}
+    table.dataTable.no-footer {
+        border-bottom: 1px solid #f1f5f9;
+    }
 
-table.dataTable thead th,
-table.dataTable thead td {
-    border-bottom: 1px solid #f1f5f9;
-}
+    table.dataTable thead th,
+    table.dataTable thead td {
+        border-bottom: 1px solid #f1f5f9;
+    }
 </style>
 
 <!-- PANGGIL SIDEBAR -->
@@ -191,8 +191,8 @@ table.dataTable thead td {
                         Filter
                     </button>
                     <?php if (!empty($filter_mulai)): ?>
-                    <a href="laporan_karyawan.php"
-                        class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition text-sm">Reset</a>
+                        <a href="laporan_karyawan.php"
+                            class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition text-sm">Reset</a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -208,11 +208,11 @@ table.dataTable thead td {
                     <h2 class="text-lg font-bold text-gray-800">
                         Dokumen Laporan Karyawan
                         <?php if (!empty($filter_mulai)): ?>
-                        <span
-                            class="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-2 border border-blue-100">
-                            (Pendaftaran: <?php echo date('d/m/Y', strtotime($filter_mulai)); ?> -
-                            <?php echo date('d/m/Y', strtotime($filter_selesai)); ?>)
-                        </span>
+                            <span
+                                class="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-2 border border-blue-100">
+                                (Pendaftaran: <?php echo date('d/m/Y', strtotime($filter_mulai)); ?> -
+                                <?php echo date('d/m/Y', strtotime($filter_selesai)); ?>)
+                            </span>
                         <?php endif; ?>
                     </h2>
                     <p class="text-sm text-gray-500">Klik tombol Export Excel atau PDF untuk mengunduh laporan.</p>
@@ -233,33 +233,33 @@ table.dataTable thead td {
                     </thead>
                     <tbody class="text-sm text-gray-700">
                         <?php if ($query_karyawan && mysqli_num_rows($query_karyawan) > 0): ?>
-                        <?php while ($row = mysqli_fetch_assoc($query_karyawan)): ?>
-                        <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
-                            <td class="p-4  text-gray-500" data-order="<?php echo strtotime($row['created_at']); ?>">
-                                <span
-                                    class="font-bold text-gray-800 block"><?php echo date('d M Y', strtotime($row['created_at'])); ?></span>
-                                <span class="text-xs"><?php echo date('H:i', strtotime($row['created_at'])); ?>
-                                    WIB</span>
-                            </td>
-                            <!-- <td class="p-4 text-center text-gray-500 font-medium">#<?php echo $row['id']; ?></td> -->
-                            <td class="p-4 font-bold text-gray-800">
-                                <?php echo htmlspecialchars($row['nama_lengkap']); ?>
-                            </td>
-                            <td class="p-4 font-medium text-gray-600">
-                                @<?php echo htmlspecialchars($row['username']); ?>
-                            </td>
-                            <td class="p-4 text-center">
-                                <?php if ($row['role'] == 'admin'): ?>
-                                <span
-                                    class="inline-flex px-3 py-1 items-center rounded-full bg-purple-50 text-purple-700 font-bold border border-purple-200 text-xs">Administrator</span>
-                                <?php else: ?>
-                                <span
-                                    class="inline-flex px-3 py-1 items-center rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 text-xs">Kasir
-                                    POS</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
+                            <?php while ($row = mysqli_fetch_assoc($query_karyawan)): ?>
+                                <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+                                    <td class="p-4  text-gray-500" data-order="<?php echo strtotime($row['created_at']); ?>">
+                                        <span
+                                            class="font-bold text-gray-800 block"><?php echo date('d M Y', strtotime($row['created_at'])); ?></span>
+                                        <span class="text-xs"><?php echo date('H:i', strtotime($row['created_at'])); ?>
+                                            WIB</span>
+                                    </td>
+                                    <!-- <td class="p-4 text-center text-gray-500 font-medium">#<?php echo $row['id']; ?></td> -->
+                                    <td class="p-4 font-bold text-gray-800">
+                                        <?php echo htmlspecialchars($row['nama_lengkap']); ?>
+                                    </td>
+                                    <td class="p-4 font-medium text-gray-600">
+                                        @<?php echo htmlspecialchars($row['username']); ?>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <?php if ($row['role'] == 'admin'): ?>
+                                            <span
+                                                class="inline-flex px-3 py-1 items-center rounded-full bg-purple-50 text-purple-700 font-bold border border-purple-200 text-xs">Administrator</span>
+                                        <?php else: ?>
+                                            <span
+                                                class="inline-flex px-3 py-1 items-center rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 text-xs">Kasir
+                                                POS</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -281,37 +281,37 @@ table.dataTable thead td {
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    $('#tabel-laporan-karyawan').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
-        },
-        order: [
-            [0, 'desc']
-        ], // Urutkan Tanggal terbaru (berdasarkan data-order timestamp)
-        pageLength: 15,
-        // Modifikasi DOM DataTables untuk menyisipkan tombol Export
-        dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
-        buttons: [{
-                extend: 'excelHtml5',
-                text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
-                className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                title: 'Laporan Data Karyawan SegarLaut'
+    $(document).ready(function() {
+        $('#tabel-laporan-karyawan').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             },
-            {
-                extend: 'pdfHtml5',
-                text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
-                className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
-                title: 'Laporan Data Karyawan SegarLaut',
-                customize: function(doc) {
-                    // Kustomisasi layout PDF: Tanggal 25%, ID 10%, Nama 30%, Username 20%, Role 15%
-                    doc.content[1].table.widths = ['25%', '10%', '30%', '20%', '15%'];
-                    doc.defaultStyle.fontSize = 10;
+            order: [
+                [0, 'desc']
+            ], // Urutkan Tanggal terbaru (berdasarkan data-order timestamp)
+            pageLength: 15,
+            // Modifikasi DOM DataTables untuk menyisipkan tombol Export
+            dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
+            buttons: [{
+                    extend: 'excelHtml5',
+                    text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
+                    className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
+                    title: 'Laporan Data Karyawan Simabeni Pangkah'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
+                    className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
+                    title: 'Laporan Data Karyawan Simabeni Pangkah',
+                    customize: function(doc) {
+                        // Kustomisasi layout PDF: Tanggal 25%, ID 10%, Nama 30%, Username 20%, Role 15%
+                        doc.content[1].table.widths = ['25%', '10%', '30%', '20%', '15%'];
+                        doc.defaultStyle.fontSize = 10;
+                    }
                 }
-            }
-        ]
+            ]
+        });
     });
-});
 </script>
 
 <?php include '../components/footer.php'; ?>
