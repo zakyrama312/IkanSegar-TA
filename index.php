@@ -96,7 +96,7 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
                         Unggul Budidaya Sukses Hasil Produksi Benih.</p>
                     <a href="#katalog"
                         class="inline-block mt-8 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1">Lihat
-                        Hasil</a>
+                        Hasil Panen</a>
                 </div>
             </div>
 

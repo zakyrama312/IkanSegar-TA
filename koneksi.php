@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "ikansegar_db";
+$db   = "db_ikan";
 
 // Melakukan koneksi ke MySQL
 $koneksi = mysqli_connect($host, $user, $pass, $db);
