@@ -431,76 +431,138 @@ include '../components/header.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
-<script>
-    $(document).ready(function() {
-        $('#tabel-transaksi').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
-            },
-            columnDefs: [{
-                orderable: false,
-                targets: 5
-            }],
-            order: [
-                [0, 'desc']
-            ],
-            pageLength: 10,
-            // Modifikasi DOM DataTables untuk menyisipkan tombol Export
-            dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
-            buttons: [{
-                    extend: 'excelHtml5',
-                    text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
-                    className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                    title: 'Laporan Penjualan Simabeni Pangkah',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4]
-                    } // Jangan ikut sertakan kolom ke-6 (Tombol Detail)
+<s<!-- LIBRARY TAMBAHAN KHUSUS EXPORT (PDF & EXCEL) -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js">
+        < /s> <
+        script src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" >
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#tabel-transaksi').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
-                {
-                    extend: 'pdfHtml5',
-                    text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
-                    className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
-                    title: 'Laporan Penjualan Simabeni Pangkah',
-                    customize: function(doc) {
-                        // Kustomisasi layout PDF
-                        doc.content[1].table.widths = ['25%', '25%', '20%', '15%', '15%'];
-                        doc.defaultStyle.fontSize = 10;
+                columnDefs: [{
+                    orderable: false,
+                    targets: 5
+                }],
+                order: [
+                    [0, 'desc']
+                ],
+                pageLength: 10,
+                // Modifikasi DOM DataTables untuk menyisipkan tombol Export
+                dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
+                buttons: [{
+                        extend: 'excelHtml5',
+                        text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
+                        className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
+                        title: 'Laporan Penjualan Simabeni Pangkah',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        } // Jangan ikut sertakan kolom ke-6 (Tombol Detail)
                     },
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4]
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
+                        className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
+                        title: 'Laporan Penjualan Simabeni Pangkah',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        customize: function(doc) {
+                            // PANGGIL FUNGSI KOP SURAT
+                            tambahkanKopSuratPdf(doc, 'LAPORAN RIWAYAT TRANSAKSI PENJUALAN');
+
+                            doc.content[3].table.widths = ['10%', '25%', '25%', '20%', '20%'];
+                            doc.defaultStyle.fontSize = 10;
+
+                            // --- FIX COLSPAN JIKA ADA FOOTER TOTAL TRANSAKSI ---
+                            let lastRowIndex = doc.content[3].table.body.length - 1;
+                            let footerRow = doc.content[3].table.body[lastRowIndex];
+                            if (footerRow && footerRow[0] && footerRow[0].text && footerRow[0].text
+                                .includes('Total')) {
+                                footerRow[0].colSpan = 4;
+                                footerRow[0].alignment = 'right';
+                                footerRow[1] = {};
+                                footerRow[2] = {};
+                                footerRow[3] = {};
+                            }
+
+                            // --- TAMBAHAN TEMPAT TANDA TANGAN ---
+                            const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei',
+                                'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November',
+                                'Desember'
+                            ];
+                            const tgl = new Date();
+                            const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
+                                .getMonth()] + ' ' + tgl.getFullYear();
+
+                            doc.content.push({
+                                margin: [0, 40, 0, 0],
+                                columns: [{
+                                        width: '50%',
+                                        alignment: 'center',
+                                        text: ['\n', 'Mengetahui,\n',
+                                            'Atasan Langsung\n',
+                                            'KEPALA UPT BBI PANGKAH\n\n\n\n\n\n', {
+                                                text: 'MARDI HARTANTO, S.ST,M.M',
+                                                bold: true,
+                                                decoration: 'underline'
+                                            }, '\nNIP. 19730619 199503 1 004'
+                                        ]
+                                    },
+                                    {
+                                        width: '50%',
+                                        alignment: 'center',
+                                        text: [tglFormat + '\n\n',
+                                            'Yang membuat pernyataan\n\n\n\n\n\n\n',
+                                            {
+                                                text: 'ALI APRIYANTO',
+                                                bold: true,
+                                                decoration: 'underline'
+                                            }, '\nNIP. 199304202025211084'
+                                        ]
+                                    }
+                                ]
+                            });
+                        }
                     }
-                }
-            ]
+                ]
+            });
         });
-    });
 
-    const formatRp = (angka) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).format(angka);
-    };
+        const formatRp = (angka) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+        };
 
-    function tutupModal(idModal) {
-        document.getElementById(idModal + '-content').classList.add('scale-95');
-        setTimeout(() => document.getElementById(idModal).classList.add('opacity-0', 'pointer-events-none'), 200);
-    }
+        function tutupModal(idModal) {
+            document.getElementById(idModal + '-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById(idModal).classList.add('opacity-0', 'pointer-events-none'), 200);
+        }
 
-    function bukaStruk(kode, tanggal, kasir, total, bayar, kembali, details) {
-        document.getElementById('struk-kode').innerText = kode;
-        document.getElementById('struk-tgl').innerText = tanggal;
-        document.getElementById('struk-kasir').innerText = kasir ? kasir : 'Admin Terhapus';
-        document.getElementById('struk-total').innerText = formatRp(total);
-        document.getElementById('struk-bayar').innerText = formatRp(bayar);
-        document.getElementById('struk-kembali').innerText = formatRp(kembali);
+        function bukaStruk(kode, tanggal, kasir, total, bayar, kembali, details) {
+            document.getElementById('struk-kode').innerText = kode;
+            document.getElementById('struk-tgl').innerText = tanggal;
+            document.getElementById('struk-kasir').innerText = kasir ? kasir : 'Admin Terhapus';
+            document.getElementById('struk-total').innerText = formatRp(total);
+            document.getElementById('struk-bayar').innerText = formatRp(bayar);
+            document.getElementById('struk-kembali').innerText = formatRp(kembali);
 
-        const listItems = document.getElementById('struk-items');
-        listItems.innerHTML = '';
+            const listItems = document.getElementById('struk-items');
+            listItems.innerHTML = '';
 
-        if (details.length > 0) {
-            details.forEach(item => {
-                let htmlRow = `
+            if (details.length > 0) {
+                details.forEach(item => {
+                    let htmlRow = `
                     <tr>
                         <td class="py-3">
                             <p class="font-bold text-gray-800 leading-tight">${item.nama_ikan || '<i class="text-red-500">Ikan Terhapus</i>'}</p>
@@ -510,18 +572,18 @@ include '../components/header.php';
                         <td class="py-3 text-right font-bold text-gray-800">${formatRp(item.subtotal)}</td>
                     </tr>
                 `;
-                listItems.innerHTML += htmlRow;
-            });
-        } else {
-            listItems.innerHTML =
-                `<tr><td colspan="3" class="py-4 text-center text-gray-400 italic">Detail item tidak ditemukan.</td></tr>`;
+                    listItems.innerHTML += htmlRow;
+                });
+            } else {
+                listItems.innerHTML =
+                    `<tr><td colspan="3" class="py-4 text-center text-gray-400 italic">Detail item tidak ditemukan.</td></tr>`;
+            }
+
+            const modal = document.getElementById('modal-struk');
+            const content = document.getElementById('modal-struk-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
         }
+    </script>
 
-        const modal = document.getElementById('modal-struk');
-        const content = document.getElementById('modal-struk-content');
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        content.classList.remove('scale-95');
-    }
-</script>
-
-<?php include '../components/footer.php'; ?>
+    <?php include '../components/footer.php'; ?>

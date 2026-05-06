@@ -86,9 +86,47 @@ include '../components/header.php';
 
     .dataTables_wrapper .dataTables_length select {
         border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 0.25rem 1rem 0.25rem 0.5rem;
-        outline: none;
+
+        <script>$(document).ready(function() {
+                $('#tabel-pembeli').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
+                    }
+
+                    ,
+                    order: [[3, 'desc']], // Urutkan berdasarkan total belanja tertinggi secara default (kolom index 3)
+
+                    pageLength: 25,
+                    dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
+                    buttons: [ {
+                        extend: 'excelHtml5',
+                        text: '<div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
+                        className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
+                        title: 'Laporan Data Pelanggan Simabeni Pangkah'
+                    }
+
+                    ,
+                    {
+
+                    extend: 'pdfHtml5',
+                    text: '<div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
+                    className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
+                    title: 'Laporan Data Pelanggan Simabeni Pangkah',
+                    customize: function (doc) {
+                        // PANGGIL FUNGSI KOP SURAT
+                        tambahkanKopSuratPdf(doc, 'LAPORAN DATA PELANGGAN (CRM)');
+
+                        doc.content[3].table.widths=['10%', '35%', '15%', '20%', '20%'];
+                        doc.defaultStyle.fontSize=10;
+                    }
+                }
+
+                ]
+            });
+    });
+    </script>border-radius: 0.5rem;
+    padding: 0.25rem 1rem 0.25rem 0.5rem;
+    outline: none;
     }
 
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
@@ -334,8 +372,46 @@ include '../components/header.php';
                     className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
                     title: 'Laporan Data Pelanggan Simabeni Pangkah',
                     customize: function(doc) {
-                        doc.content[1].table.widths = ['10%', '35%', '15%', '20%', '20%'];
+                        // PANGGIL FUNGSI KOP SURAT
+                        tambahkanKopSuratPdf(doc, 'LAPORAN DATA PELANGGAN (CRM)');
+
+                        doc.content[3].table.widths = ['10%', '35%', '15%', '20%', '20%'];
                         doc.defaultStyle.fontSize = 10;
+
+                        // --- TAMBAHAN TEMPAT TANDA TANGAN ---
+                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                        ];
+                        const tgl = new Date();
+                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
+                            .getMonth()] + ' ' + tgl.getFullYear();
+
+                        doc.content.push({
+                            margin: [0, 40, 0, 0],
+                            columns: [{
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: ['\n', 'Mengetahui,\n', 'Atasan Langsung\n',
+                                        'KEPALA UPT BBI PANGKAH\n\n\n\n\n\n', {
+                                            text: 'MARDI HARTANTO, S.ST,M.M',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        }, '\nNIP. 19730619 199503 1 004'
+                                    ]
+                                },
+                                {
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: [tglFormat + '\n\n',
+                                        'Yang membuat pernyataan\n\n\n\n\n\n\n', {
+                                            text: 'ALI APRIYANTO',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        }, '\nNIP. 199304202025211084'
+                                    ]
+                                }
+                            ]
+                        });
                     }
                 }
             ]

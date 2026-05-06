@@ -304,9 +304,46 @@ include '../components/header.php';
                     className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
                     title: 'Laporan Data Karyawan Simabeni Pangkah',
                     customize: function(doc) {
-                        // Kustomisasi layout PDF: Tanggal 25%, ID 10%, Nama 30%, Username 20%, Role 15%
-                        doc.content[1].table.widths = ['25%', '10%', '30%', '20%', '15%'];
+                        // PANGGIL FUNGSI KOP SURAT
+                        tambahkanKopSuratPdf(doc, 'LAPORAN DATA KARYAWAN & HAK AKSES');
+
+                        doc.content[3].table.widths = ['25%', '10%', '30%', '20%', '15%'];
                         doc.defaultStyle.fontSize = 10;
+
+                        // --- TAMBAHAN TEMPAT TANDA TANGAN ---
+                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                        ];
+                        const tgl = new Date();
+                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
+                            .getMonth()] + ' ' + tgl.getFullYear();
+
+                        doc.content.push({
+                            margin: [0, 40, 0, 0],
+                            columns: [{
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: ['\n', 'Mengetahui,\n', 'Atasan Langsung\n',
+                                        'KEPALA UPT BBI PANGKAH\n\n\n\n\n\n', {
+                                            text: 'MARDI HARTANTO, S.ST,M.M',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        }, '\nNIP. 19730619 199503 1 004'
+                                    ]
+                                },
+                                {
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: [tglFormat + '\n\n',
+                                        'Yang membuat pernyataan\n\n\n\n\n\n\n', {
+                                            text: 'ALI APRIYANTO',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        }, '\nNIP. 199304202025211084'
+                                    ]
+                                }
+                            ]
+                        });
                     }
                 }
             ]

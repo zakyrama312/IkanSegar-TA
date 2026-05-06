@@ -360,19 +360,86 @@ $(document).ready(function() {
                 extend: 'excelHtml5',
                 text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                 className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                title: 'Laporan Data Simabeni Pangkah',
+                title: 'Laporan Data Ikan Simabeni Pangkah',
                 footer: true
             },
             {
                 extend: 'pdfHtml5',
                 text: '<div class="flex items-center bg-red-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path></svg> Cetak PDF</div>',
                 className: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm ml-2',
-                title: 'Laporan Data Simabeni Pangkah',
+                title: 'Laporan Data Ikan Simabeni Pangkah',
                 footer: true,
                 customize: function(doc) {
+                    // PANGGIL FUNGSI KOP SURAT
+                    tambahkanKopSuratPdf(doc, 'REKAPITULASI LAPORAN DATA IKAN');
+
                     // Kustomisasi layout PDF untuk mengakomodasi 6 kolom (Total 100%)
-                    doc.content[1].table.widths = ['5%', '30%', '20%', '15%', '15%', '15%'];
+                    // Perhatikan: doc.content[1] diubah menjadi doc.content[3]
+                    doc.content[3].table.widths = ['5%', '30%', '20%', '15%', '15%', '15%'];
                     doc.defaultStyle.fontSize = 10;
+
+                    // --- PERBAIKAN COLSPAN FOOTER ---
+                    // Cari baris terakhir (footer) di dalam tabel
+                    let lastRowIndex = doc.content[3].table.body.length - 1;
+                    let footerRow = doc.content[3].table.body[lastRowIndex];
+
+                    // Jadikan kolom pertama membentang 3 kolom (karena colspan di HTML adalah 3)
+                    footerRow[0].colSpan = 3;
+                    footerRow[0].alignment = 'right';
+
+                    // Wajib mengosongkan kolom ke-2 dan ke-3 agar pdfmake tidak mencetak duplikat
+                    footerRow[1] = {};
+                    footerRow[2] = {};
+
+                    // --- TAMBAHAN TEMPAT TANDA TANGAN ---
+                    // 1. Buat format tanggal bahasa Indonesia
+                    const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                    ];
+                    const tgl = new Date();
+                    const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
+                        .getMonth()] + ' ' + tgl.getFullYear();
+
+                    // 2. Suntikkan layout kolom tanda tangan ke bagian paling bawah PDF
+                    doc.content.push({
+                        margin: [0, 40, 0,
+                            0
+                        ], // Beri jarak (margin) dari tabel ke tanda tangan
+                        columns: [
+                            // Sisi Kiri (Kepala UPT BBI PANGKAH)
+                            {
+                                width: '50%',
+                                alignment: 'center',
+                                text: [
+                                    '\n', // Spacer agar sejajar dengan tanggal di kanan
+                                    'Mengetahui,\n',
+                                    'Atasan Langsung\n',
+                                    'KEPALA UPT BBI PANGKAH\n\n\n\n\n\n',
+                                    {
+                                        text: 'MARDI HARTANTO, S.ST,M.M',
+                                        bold: true,
+                                        decoration: 'underline'
+                                    },
+                                    '\nNIP. 19730619 199503 1 004'
+                                ]
+                            },
+                            // Sisi Kanan (Petugas / Yang membuat pernyataan)
+                            {
+                                width: '50%',
+                                alignment: 'center',
+                                text: [
+                                    tglFormat + '\n\n', // Tanggal dinamis
+                                    'Yang membuat pernyataan\n\n\n\n\n\n\n',
+                                    {
+                                        text: 'ALI APRIYANTO',
+                                        bold: true,
+                                        decoration: 'underline'
+                                    },
+                                    '\nNIP. 199304202025211084'
+                                ]
+                            }
+                        ]
+                    });
                 }
             }
         ]

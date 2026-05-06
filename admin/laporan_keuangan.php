@@ -279,6 +279,7 @@ include '../components/header.php';
                                 <td class="p-4 text-amber-700 italic">Saldo Awal (Sebelum
                                     <?php echo date('d/m/Y', strtotime($filter_mulai)); ?>)</td>
                                 <td class="p-4 text-center">-</td>
+                                <td class="p-4 text-center">-</td>
                                 <td class="p-4 text-right">-</td>
                                 <td class="p-4 text-right">-</td>
                                 <td class="p-4 text-right text-amber-700"><?php echo formatRupiah($saldo_awal); ?></td>
@@ -319,7 +320,6 @@ include '../components/header.php';
                             <?php endforeach; ?>
                         <?php else: ?>
                             <!-- Hapus colspan karena DataTables akan otomatis membuat "No data available" secara cerdas -->
-                            <!-- Tapi untuk aman di PHP, jika empty: -->
                             <tr>
                                 <td colspan="7" class="p-8 text-center text-gray-500 italic">Belum ada data keuangan pada
                                     periode ini.</td>
@@ -371,7 +371,7 @@ include '../components/header.php';
                     extend: 'excelHtml5',
                     text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                    title: 'Laporan Simabeni Pangkah',
+                    title: 'Laporan keuangan Simabeni Pangkah',
                     footer: true // Agar total di bawah ikut terekspor
                 },
                 {
@@ -383,12 +383,78 @@ include '../components/header.php';
                     pageSize: 'A4',
                     footer: true,
                     customize: function(doc) {
-                        // PERBAIKAN DI SINI: Array widths diubah menjadi 7 sesuai dengan jumlah total kolom (100%)
-                        // No 5%, Waktu 15%, Keterangan 25%, Pencatat 10%, Masuk 15%, Keluar 15%, Saldo 15%
-                        doc.content[1].table.widths = ['5%', '15%', '25%', '10%', '15%', '15%',
+                        // PANGGIL FUNGSI KOP SURAT
+                        tambahkanKopSuratPdf(doc, 'LAPORAN KEUANGAN & ARUS KAS');
+
+                        // Array widths diubah menjadi 7 sesuai dengan jumlah total kolom (100%)
+                        doc.content[3].table.widths = ['5%', '15%', '25%', '10%', '15%', '15%',
                             '15%'
                         ];
                         doc.defaultStyle.fontSize = 10;
+
+                        // --- PERBAIKAN COLSPAN FOOTER ---
+                        // Cari baris terakhir (footer) di dalam tabel
+                        let lastRowIndex = doc.content[3].table.body.length - 1;
+                        let footerRow = doc.content[3].table.body[lastRowIndex];
+
+                        // Jadikan kolom pertama membentang 4 kolom (colSpan: 4)
+                        footerRow[0].colSpan = 4;
+                        footerRow[0].alignment = 'right';
+
+                        // Wajib mengosongkan kolom ke-2, 3, dan 4 agar pdfmake tidak mencetak duplikat
+                        footerRow[1] = {};
+                        footerRow[2] = {};
+                        footerRow[3] = {};
+
+                        // --- TAMBAHAN TEMPAT TANDA TANGAN ---
+                        // 1. Buat format tanggal bahasa Indonesia
+                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                        ];
+                        const tgl = new Date();
+                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
+                            .getMonth()] + ' ' + tgl.getFullYear();
+
+                        // 2. Suntikkan layout kolom tanda tangan ke bagian paling bawah PDF
+                        doc.content.push({
+                            margin: [0, 40, 0,
+                                0
+                            ], // Beri jarak (margin) dari tabel ke tanda tangan
+                            columns: [
+                                // Sisi Kiri (Kepala UPT BBI PANGKAH)
+                                {
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: [
+                                        '\n', // Spacer agar sejajar dengan tanggal di kanan
+                                        'Mengetahui,\n',
+                                        'Atasan Langsung\n',
+                                        'KEPALA UPT BBI PANGKAH\n\n\n\n\n\n',
+                                        {
+                                            text: 'MARDI HARTANTO, S.ST,M.M',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        },
+                                        '\nNIP. 19730619 199503 1 004'
+                                    ]
+                                },
+                                // Sisi Kanan (Petugas / Yang membuat pernyataan)
+                                {
+                                    width: '50%',
+                                    alignment: 'center',
+                                    text: [
+                                        tglFormat + '\n\n', // Tanggal dinamis
+                                        'Yang membuat pernyataan\n\n\n\n\n\n\n',
+                                        {
+                                            text: 'ALI APRIYANTO',
+                                            bold: true,
+                                            decoration: 'underline'
+                                        },
+                                        '\nNIP. 199304202025211084'
+                                    ]
+                                }
+                            ]
+                        });
                     }
                 }
             ]
