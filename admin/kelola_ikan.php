@@ -20,6 +20,9 @@ if (isset($_POST['tambah_ikan'])) {
     $harga = (int)$_POST['harga'];
     $stok = (int)$_POST['stok'];
     $satuan = mysqli_real_escape_string($koneksi, $_POST['satuan']);
+    
+    $tanggal_input = $_POST['tanggal'];
+    $tanggal = date('Y-m-d H:i:s', strtotime($tanggal_input));
 
     $nama_file_gambar = 'default.jpg';
 
@@ -48,13 +51,13 @@ if (isset($_POST['tambah_ikan'])) {
     }
 
     if (!isset($_SESSION['pesan_error'])) {
-        $query_insert = "INSERT INTO ikan (nama_ikan, harga, stok, satuan, status_aktif, gambar) 
-                         VALUES ('$nama', '$harga', '$stok', '$satuan', 1, '$nama_file_gambar')";
+        $query_insert = "INSERT INTO ikan (nama_ikan, harga, stok, satuan, status_aktif, gambar, created_at) 
+                         VALUES ('$nama', '$harga', '$stok', '$satuan', 1, '$nama_file_gambar', '$tanggal')";
 
         if (mysqli_query($koneksi, $query_insert)) {
             $ikan_id_baru = mysqli_insert_id($koneksi);
-            mysqli_query($koneksi, "INSERT INTO riwayat_stok (ikan_id, jumlah_tambah, keterangan) 
-                                    VALUES ($ikan_id_baru, $stok, 'Stok Awal (Input Data Baru)')");
+            mysqli_query($koneksi, "INSERT INTO riwayat_stok (ikan_id, jumlah_tambah, tanggal_tambah, keterangan) 
+                                    VALUES ($ikan_id_baru, $stok, '$tanggal', 'Stok Awal (Input Data Baru)')");
             $_SESSION['pesan_sukses'] = "Berhasil! Ikan baru beserta fotonya telah ditambahkan.";
         } else {
             $_SESSION['pesan_error'] = "Gagal menyimpan ke database: " . mysqli_error($koneksi);
@@ -72,8 +75,11 @@ if (isset($_POST['edit_ikan'])) {
     $nama_baru = mysqli_real_escape_string($koneksi, $_POST['edit_nama_ikan']);
     $harga_baru = (int)$_POST['edit_harga'];
     $satuan_baru = mysqli_real_escape_string($koneksi, $_POST['edit_satuan']);
+    
+    $tanggal_input = $_POST['edit_tanggal'];
+    $tanggal = date('Y-m-d H:i:s', strtotime($tanggal_input));
 
-    $query_update = "UPDATE ikan SET nama_ikan = '$nama_baru', harga = $harga_baru, satuan = '$satuan_baru'";
+    $query_update = "UPDATE ikan SET nama_ikan = '$nama_baru', harga = $harga_baru, satuan = '$satuan_baru', created_at = '$tanggal'";
 
     if (isset($_FILES['edit_gambar']) && $_FILES['edit_gambar']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['edit_gambar']['tmp_name'];
@@ -105,6 +111,7 @@ if (isset($_POST['edit_ikan'])) {
     $query_update .= " WHERE id = $id_edit";
 
     if (mysqli_query($koneksi, $query_update)) {
+        mysqli_query($koneksi, "UPDATE riwayat_stok SET tanggal_tambah = '$tanggal' WHERE ikan_id = $id_edit AND keterangan = 'Stok Awal (Input Data Baru)'");
         $_SESSION['pesan_sukses'] = "Data ikan berhasil diperbarui!";
     } else {
         $_SESSION['pesan_error'] = "Gagal memperbarui data: " . mysqli_error($koneksi);
@@ -120,11 +127,14 @@ if (isset($_POST['submit_restock'])) {
     $ikan_id = (int)$_POST['ikan_id_restock'];
     $jumlah_tambah = (int)$_POST['jumlah_tambah'];
     $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan_restock']);
+    
+    $tanggal_input = $_POST['tanggal_restock'];
+    $tanggal = date('Y-m-d H:i:s', strtotime($tanggal_input));
 
     if ($jumlah_tambah > 0) {
         mysqli_query($koneksi, "UPDATE ikan SET stok = stok + $jumlah_tambah WHERE id = $ikan_id");
-        mysqli_query($koneksi, "INSERT INTO riwayat_stok (ikan_id, jumlah_tambah, keterangan) 
-                                VALUES ($ikan_id, $jumlah_tambah, '$keterangan')");
+        mysqli_query($koneksi, "INSERT INTO riwayat_stok (ikan_id, jumlah_tambah, tanggal_tambah, keterangan) 
+                                VALUES ($ikan_id, $jumlah_tambah, '$tanggal', '$keterangan')");
         $_SESSION['pesan_sukses'] = "Berhasil menambahkan stok baru!";
     }
     header("Location: kelola_ikan.php");
@@ -358,7 +368,7 @@ include '../components/header.php';
                                         data-order="<?php echo $ikan['tgl_terakhir_tambah'] ? strtotime($ikan['tgl_terakhir_tambah']) : 0; ?>">
                                         <?php
                                         if ($ikan['tgl_terakhir_tambah']) {
-                                            echo date('d M Y, H:i', strtotime($ikan['tgl_terakhir_tambah']));
+                                            echo formatTanggalIndonesia($ikan['tgl_terakhir_tambah']);
                                         } else {
                                             echo '<span class="text-gray-400 italic">Belum ada riwayat</span>';
                                         }
@@ -368,7 +378,7 @@ include '../components/header.php';
                                     <td class="p-4">
                                         <div class="flex items-center justify-center gap-2">
                                             <button
-                                                onclick="bukaModalEdit(<?php echo $ikan['id']; ?>, '<?php echo htmlspecialchars($ikan['nama_ikan'], ENT_QUOTES); ?>', <?php echo $ikan['harga']; ?>, '<?php echo $ikan['satuan']; ?>')"
+                                                onclick="bukaModalEdit(<?php echo $ikan['id']; ?>, '<?php echo htmlspecialchars($ikan['nama_ikan'], ENT_QUOTES); ?>', <?php echo $ikan['harga']; ?>, '<?php echo $ikan['satuan']; ?>', '<?php echo date('Y-m-d\TH:i', strtotime($ikan['created_at'])); ?>')"
                                                 class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition"
                                                 title="Edit Data Ikan">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,6 +454,11 @@ include '../components/header.php';
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none bg-gray-50 focus:bg-white">
                         </div>
                         <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal & Waktu Ditambahkan</label>
+                            <input type="datetime-local" name="tanggal" required value="<?php echo date('Y-m-d\TH:i'); ?>"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none bg-gray-50 focus:bg-white">
+                        </div>
+                        <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Foto Ikan <span
                                     class="text-gray-400 font-normal">(Opsional, Maks 2MB)</span></label>
                             <input name="gambar" type="file" accept=".jpg,.jpeg,.png,.webp"
@@ -499,6 +514,11 @@ include '../components/header.php';
                     <div class="space-y-4">
                         <div><label class="block text-sm font-semibold text-gray-700 mb-1">Nama Ikan</label><input
                                 type="text" name="edit_nama_ikan" id="input_edit_nama" required
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-amber-500 outline-none bg-gray-50 focus:bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal & Waktu Ditambahkan</label>
+                            <input type="datetime-local" name="edit_tanggal" id="input_edit_tanggal" required
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-amber-500 outline-none bg-gray-50 focus:bg-white">
                         </div>
                         <div>
@@ -568,6 +588,11 @@ include '../components/header.php';
                             <input type="text" name="keterangan_restock"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 outline-none bg-gray-50"
                                 placeholder="">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal & Waktu Ditambahkan</label>
+                            <input type="datetime-local" name="tanggal_restock" required value="<?php echo date('Y-m-d\TH:i'); ?>"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 outline-none bg-gray-50">
                         </div>
                     </div>
                     <div class="mt-8 flex gap-3">
@@ -669,11 +694,12 @@ include '../components/header.php';
         setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 200);
     }
 
-    function bukaModalEdit(id, nama, harga, satuan) {
+    function bukaModalEdit(id, nama, harga, satuan, tanggal) {
         document.getElementById('input_edit_id').value = id;
         document.getElementById('input_edit_nama').value = nama;
         document.getElementById('input_edit_harga').value = harga;
         document.getElementById('input_edit_satuan').value = satuan;
+        document.getElementById('input_edit_tanggal').value = tanggal;
         bukaModal('modal-edit');
     }
 
@@ -698,7 +724,7 @@ include '../components/header.php';
                 const tgl = new Date(row.tanggal_tambah);
                 const formattedDate = tgl.toLocaleDateString('id-ID', {
                     day: '2-digit',
-                    month: 'short',
+                    month: 'long',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'

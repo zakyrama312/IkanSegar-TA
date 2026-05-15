@@ -32,12 +32,15 @@ if (isset($_POST['proses_bayar'])) {
 
         // Validasi uang bayar
         if ($kembalian >= 0) {
+            $tanggal_input = $_POST['tanggal_transaksi'];
+            $tanggal = date('Y-m-d H:i:s', strtotime($tanggal_input));
+            
             // 1. Buat Kode Transaksi Unik (TRX-TahunBulanHari-JamMenitDetik)
-            $kode_trx = 'TRX-' . date('Ymd-His');
+            $kode_trx = 'TRX-' . date('Ymd-His', strtotime($tanggal_input));
 
             // 2. Simpan ke tabel `transaksi`
-            $query_trx = "INSERT INTO transaksi (kode_transaksi, total_belanja, jumlah_bayar, kembalian, user_id) 
-                          VALUES ('$kode_trx', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
+            $query_trx = "INSERT INTO transaksi (kode_transaksi, tanggal_waktu, total_belanja, jumlah_bayar, kembalian, user_id) 
+                          VALUES ('$kode_trx', '$tanggal', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
 
             if (mysqli_query($koneksi, $query_trx)) {
                 $transaksi_id = mysqli_insert_id($koneksi); // Ambil ID transaksi yang baru saja dibuat
@@ -228,6 +231,11 @@ while ($row = mysqli_fetch_assoc($query_ikan)) {
 
                 <!-- Rincian Total -->
                 <div class="space-y-2 mb-5">
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Tanggal Transaksi</label>
+                        <input type="datetime-local" name="tanggal_transaksi" required value="<?php echo date('Y-m-d\TH:i'); ?>"
+                               class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                    </div>
                     <div class="flex justify-between text-gray-500 text-sm">
                         <span>Subtotal Item</span>
                         <span id="subtotal-teks">Rp 0</span>

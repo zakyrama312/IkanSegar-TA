@@ -64,11 +64,14 @@ if (isset($_POST['proses_bayar'])) {
         $kembalian = $jumlah_bayar - $total_belanja;
 
         if ($kembalian >= 0) {
-            $kode_trx = 'TRX-' . date('Ymd-His');
+            $tanggal_input = $_POST['tanggal_transaksi'];
+            $tanggal = date('Y-m-d H:i:s', strtotime($tanggal_input));
+            
+            $kode_trx = 'TRX-' . date('Ymd-His', strtotime($tanggal_input));
 
             // 1. Simpan Transaksi Utama
-            $query_trx = "INSERT INTO transaksi (kode_transaksi, nama_pembeli, total_belanja, jumlah_bayar, kembalian, user_id) 
-                          VALUES ('$kode_trx', '$nama_pembeli', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
+            $query_trx = "INSERT INTO transaksi (kode_transaksi, nama_pembeli, tanggal_waktu, total_belanja, jumlah_bayar, kembalian, user_id) 
+                          VALUES ('$kode_trx', '$nama_pembeli', '$tanggal', $total_belanja, $jumlah_bayar, $kembalian, $user_id)";
 
             if (mysqli_query($koneksi, $query_trx)) {
                 $transaksi_id = mysqli_insert_id($koneksi);
@@ -115,7 +118,7 @@ if (isset($_POST['proses_bayar'])) {
                     'pembeli' => $nama_pembeli,
                     'no_hp' => $no_hp_pembeli,
                     'alamat' => $alamat_pembeli,
-                    'tanggal' => date('d M Y H:i:s'),
+                    'tanggal' => formatTanggalIndonesia($tanggal),
                     'total' => $total_belanja,
                     'bayar' => $jumlah_bayar,
                     'kembali' => $kembalian,
@@ -458,6 +461,12 @@ $json_pelanggan = json_encode($data_pelanggan_array);
                                         class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                                 </div>
                             </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Tanggal Transaksi</label>
+                            <input type="datetime-local" name="tanggal_transaksi" required value="<?php echo date('Y-m-d\TH:i'); ?>"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
                         </div>
 
                         <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-center">
