@@ -224,8 +224,8 @@ include '../components/header.php';
                 <table id="tabel-laporan-karyawan" class="w-full text-left whitespace-nowrap">
                     <thead>
                         <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                            <th class="p-4 font-semibold w-16 text-center">No</th>
                             <th class="p-4 font-semibold ">Tanggal Terdaftar</th>
-                            <!-- <th class="p-4 font-semibold w-16 text-center">ID</th> -->
                             <th class="p-4 font-semibold">Nama Lengkap</th>
                             <th class="p-4 font-semibold">Username Login</th>
                             <th class="p-4 font-semibold text-center">Role / Akses</th>
@@ -233,15 +233,13 @@ include '../components/header.php';
                     </thead>
                     <tbody class="text-sm text-gray-700">
                         <?php if ($query_karyawan && mysqli_num_rows($query_karyawan) > 0): ?>
+                            <?php $no = 1; ?>
                             <?php while ($row = mysqli_fetch_assoc($query_karyawan)): ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+                                    <td class="p-4 text-center font-medium text-gray-600"><?php echo $no++; ?></td>
                                     <td class="p-4  text-gray-500" data-order="<?php echo strtotime($row['created_at']); ?>">
-                                        <span
-                                            class="font-bold text-gray-800 block"><?php echo date('d M Y', strtotime($row['created_at'])); ?></span>
-                                        <span class="text-xs"><?php echo date('H:i', strtotime($row['created_at'])); ?>
-                                            WIB</span>
+                                        <span class="font-bold text-gray-800 block"><?php echo formatTanggalIndonesia($row['created_at'], false); ?></span>
                                     </td>
-                                    <!-- <td class="p-4 text-center text-gray-500 font-medium">#<?php echo $row['id']; ?></td> -->
                                     <td class="p-4 font-bold text-gray-800">
                                         <?php echo htmlspecialchars($row['nama_lengkap']); ?>
                                     </td>
@@ -282,12 +280,17 @@ include '../components/header.php';
 
 <script>
     $(document).ready(function() {
-        $('#tabel-laporan-karyawan').DataTable({
+        var table = $('#tabel-laporan-karyawan').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             },
+            columnDefs: [{
+                searchable: false,
+                orderable: false,
+                targets: 0
+            }],
             order: [
-                [0, 'desc']
+                [1, 'desc']
             ], // Urutkan Tanggal terbaru (berdasarkan data-order timestamp)
             pageLength: 15,
             // Modifikasi DOM DataTables untuk menyisipkan tombol Export
@@ -307,16 +310,11 @@ include '../components/header.php';
                         // PANGGIL FUNGSI KOP SURAT
                         tambahkanKopSuratPdf(doc, 'LAPORAN DATA KARYAWAN & HAK AKSES');
 
-                        doc.content[3].table.widths = ['25%', '10%', '30%', '20%', '15%'];
+                        doc.content[3].table.widths = ['10%', '20%', '30%', '25%', '15%'];
                         doc.defaultStyle.fontSize = 10;
 
                         // --- TAMBAHAN TEMPAT TANDA TANGAN ---
-                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                        ];
-                        const tgl = new Date();
-                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
-                            .getMonth()] + ' ' + tgl.getFullYear();
+                        const tglFormat = 'Slawi, <?php echo !empty($filter_selesai) ? formatTanggalIndonesia($filter_selesai, false) : formatTanggalIndonesia(date('Y-m-d'), false); ?>';
 
                         doc.content.push({
                             margin: [0, 40, 0, 0],
@@ -348,6 +346,13 @@ include '../components/header.php';
                 }
             ]
         });
+
+        table.on('order.dt search.dt', function() {
+            let i = 1;
+            table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function(cell) {
+                this.data(i++);
+            });
+        }).draw();
     });
 </script>
 

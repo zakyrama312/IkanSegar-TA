@@ -247,12 +247,12 @@ table.dataTable thead td {
                     <thead>
                         <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider">
                             <th class="p-4 font-semibold text-center w-16">No</th>
-
                             <th class="p-4 font-semibold">Tgl Terakhir Masuk</th>
                             <th class="p-4 font-semibold">Nama Produk</th>
-                            <th class="p-4 font-semibold text-center">Stok Masuk (+)</th>
-                            <th class="p-4 font-semibold text-center">Stok Keluar (-)</th>
-                            <th class="p-4 font-semibold text-center">Sisa Saat Ini</th>
+                            <th class="p-4 font-semibold text-right">Stok Masuk (+)</th>
+                            <th class="p-4 font-semibold text-right">Stok Keluar (-)</th>
+                            <th class="p-4 font-semibold text-right">Sisa Saat Ini</th>
+                            <th class="p-4 font-semibold text-center">Satuan</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm text-gray-700">
@@ -264,39 +264,39 @@ table.dataTable thead td {
                             <!-- Kolom Tgl Terakhir Masuk Baru -->
                             <td class="p-4 text-gray-500 text-xs"
                                 data-order="<?php echo $row['tgl_terakhir_masuk'] ? strtotime($row['tgl_terakhir_masuk']) : 0; ?>">
-                                <?php echo $row['tgl_terakhir_masuk'] ? date('d M Y, H:i', strtotime($row['tgl_terakhir_masuk'])) : '<span class="italic text-gray-400">-</span>'; ?>
+                                <?php echo $row['tgl_terakhir_masuk'] ? formatTanggalIndonesia($row['tgl_terakhir_masuk'], false) : '<span class="italic text-gray-400">-</span>'; ?>
                             </td>
                             <td class="p-4 font-bold text-blue-600">
                                 <?php echo htmlspecialchars($row['nama_ikan']); ?>
                             </td>
 
-
-
                             <!-- Kolom Stok Masuk -->
-                            <td class="p-4 text-center" data-order="<?php echo $row['masuk']; ?>">
+                            <td class="p-4 text-right" data-order="<?php echo $row['masuk']; ?>">
                                 <span
                                     class="inline-flex px-3 py-1 items-center rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-sm text-xs">
                                     + <?php echo number_format($row['masuk'], 0, ',', '.'); ?>
-                                    <?php echo $row['satuan']; ?>
                                 </span>
                             </td>
 
                             <!-- Kolom Stok Keluar -->
-                            <td class="p-4 text-center" data-order="<?php echo $row['keluar']; ?>">
+                            <td class="p-4 text-right" data-order="<?php echo $row['keluar']; ?>">
                                 <span
                                     class="inline-flex px-3 py-1 items-center rounded-lg bg-red-50 text-red-600 font-bold border border-red-100 shadow-sm text-xs">
                                     - <?php echo number_format($row['keluar'], 0, ',', '.'); ?>
-                                    <?php echo $row['satuan']; ?>
                                 </span>
                             </td>
 
                             <!-- Kolom Sisa Saat Ini -->
-                            <td class="p-4 text-center" data-order="<?php echo $row['stok_sekarang']; ?>">
+                            <td class="p-4 text-right" data-order="<?php echo $row['stok_sekarang']; ?>">
                                 <span
                                     class="inline-flex px-3 py-1.5 items-center rounded-lg <?php echo $row['stok_sekarang'] <= 0 ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-700'; ?> font-black border border-blue-100 shadow-sm text-sm">
                                     <?php echo number_format($row['stok_sekarang'], 0, ',', '.'); ?>
-                                    <?php echo $row['satuan']; ?>
                                 </span>
+                            </td>
+                            
+                            <!-- Kolom Satuan -->
+                            <td class="p-4 text-center font-semibold text-gray-600">
+                                <?php echo htmlspecialchars($row['satuan']); ?>
                             </td>
                         </tr>
                         <?php }
@@ -307,15 +307,15 @@ table.dataTable thead td {
                     <?php if (!empty($data_tabel)): ?>
                     <tfoot class="bg-gray-50 font-bold">
                         <tr>
-                            <!-- Colspan diubah dari 2 menjadi 3 karena ada tambahan kolom tanggal -->
                             <td colspan="3" class="p-4 text-right text-gray-600 uppercase tracking-wider text-xs">Total
                                 Keseluruhan:</td>
-                            <td class="p-4 text-center text-emerald-600">+
+                            <td class="p-4 text-right text-emerald-600">
                                 <?php echo number_format($total_semua_masuk, 0, ',', '.'); ?></td>
-                            <td class="p-4 text-center text-red-500">-
+                            <td class="p-4 text-right text-red-500">
                                 <?php echo number_format($total_semua_keluar, 0, ',', '.'); ?></td>
-                            <td class="p-4 text-center text-blue-600 border-t-2 border-blue-500">
+                            <td class="p-4 text-right text-blue-600 border-t-2 border-blue-500">
                                 <?php echo number_format($total_semua_stok, 0, ',', '.'); ?></td>
+                            <td class="p-4 text-center"></td>
                         </tr>
                     </tfoot>
                     <?php endif; ?>
@@ -361,7 +361,13 @@ $(document).ready(function() {
                 text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                 className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
                 title: 'Laporan Data Ikan Simabeni Pangkah',
-                footer: true
+                footer: true,
+                customize: function(xlsx) {
+                    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    $('row c[r^="D"]', sheet).attr('s', '52');
+                    $('row c[r^="E"]', sheet).attr('s', '52');
+                    $('row c[r^="F"]', sheet).attr('s', '52');
+                }
             },
             {
                 extend: 'pdfHtml5',
@@ -373,10 +379,19 @@ $(document).ready(function() {
                     // PANGGIL FUNGSI KOP SURAT
                     tambahkanKopSuratPdf(doc, 'REKAPITULASI LAPORAN DATA IKAN');
 
-                    // Kustomisasi layout PDF untuk mengakomodasi 6 kolom (Total 100%)
-                    // Perhatikan: doc.content[1] diubah menjadi doc.content[3]
-                    doc.content[3].table.widths = ['5%', '30%', '20%', '15%', '15%', '15%'];
+                    // Kustomisasi layout PDF untuk mengakomodasi 7 kolom (Total 100%)
+                    doc.content[3].table.widths = ['5%', '20%', '25%', '13%', '13%', '14%', '10%'];
                     doc.defaultStyle.fontSize = 10;
+
+                    if (doc.content[3] && doc.content[3].table && doc.content[3].table.body) {
+                        doc.content[3].table.body.forEach(function(row) {
+                            if (row[0]) row[0].alignment = 'center';
+                            if (row[3]) row[3].alignment = 'right';
+                            if (row[4]) row[4].alignment = 'right';
+                            if (row[5]) row[5].alignment = 'right';
+                            if (row[6]) row[6].alignment = 'center';
+                        });
+                    }
 
                     // --- PERBAIKAN COLSPAN FOOTER ---
                     // Cari baris terakhir (footer) di dalam tabel
@@ -387,18 +402,12 @@ $(document).ready(function() {
                     footerRow[0].colSpan = 3;
                     footerRow[0].alignment = 'right';
 
-                    // Wajib mengosongkan kolom ke-2 dan ke-3 agar pdfmake tidak mencetak duplikat
+                    // Wajib mengosongkan kolom yang disatukan
                     footerRow[1] = {};
                     footerRow[2] = {};
 
                     // --- TAMBAHAN TEMPAT TANDA TANGAN ---
-                    // 1. Buat format tanggal bahasa Indonesia
-                    const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                    ];
-                    const tgl = new Date();
-                    const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
-                        .getMonth()] + ' ' + tgl.getFullYear();
+                    const tglFormat = 'Slawi, <?php echo !empty($filter_selesai) ? formatTanggalIndonesia($filter_selesai, false) : formatTanggalIndonesia(date('Y-m-d'), false); ?>';
 
                     // 2. Suntikkan layout kolom tanda tangan ke bagian paling bawah PDF
                     doc.content.push({

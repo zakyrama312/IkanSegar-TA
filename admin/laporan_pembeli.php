@@ -278,10 +278,10 @@ include '../components/header.php';
                     <thead>
                         <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider">
                             <th class="p-4 font-semibold text-center w-16">No</th>
+                            <th class="p-4 font-semibold text-center">Transaksi Terakhir</th>
                             <th class="p-4 font-semibold">Nama Pembeli</th>
                             <th class="p-4 font-semibold text-center">Jml. Transaksi</th>
                             <th class="p-4 font-semibold text-right">Total Belanja (Rp)</th>
-                            <th class="p-4 font-semibold text-center">Transaksi Terakhir</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
@@ -294,12 +294,14 @@ include '../components/header.php';
                                 <tr class="hover:bg-blue-50/30 transition-colors">
                                     <td class="p-4 text-center text-gray-500"><?php echo $no++; ?></td>
 
+                                    <td class="p-4 text-gray-500"
+                                        data-order="<?php echo strtotime($row['transaksi_terakhir']); ?>">
+                                        <?php echo formatTanggalIndonesia($row['transaksi_terakhir'], true); ?>
+                                    </td>
+
                                     <td class="p-4">
                                         <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs <?php echo $is_umum ? 'bg-slate-400' : 'bg-purple-500'; ?>">
-                                                <?php echo strtoupper(substr($row['nama_pembeli'], 0, 1)); ?>
-                                            </div>
+                                        
                                             <span class="font-bold <?php echo $is_umum ? 'text-gray-500' : 'text-gray-800'; ?>">
                                                 <?php echo htmlspecialchars($row['nama_pembeli']); ?>
                                             </span>
@@ -316,11 +318,6 @@ include '../components/header.php';
                                     <td class="p-4 text-right font-black text-emerald-600"
                                         data-order="<?php echo $row['total_belanja']; ?>">
                                         <?php echo formatRupiah($row['total_belanja']); ?>
-                                    </td>
-
-                                    <td class="p-4 text-center text-gray-500"
-                                        data-order="<?php echo strtotime($row['transaksi_terakhir']); ?>">
-                                        <?php echo date('d M Y, H:i', strtotime($row['transaksi_terakhir'])); ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -356,15 +353,19 @@ include '../components/header.php';
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             },
             order: [
-                [3, 'desc']
-            ], // Urutkan berdasarkan total belanja tertinggi secara default (kolom index 3)
+                [4, 'desc']
+            ], // Urutkan berdasarkan total belanja tertinggi secara default (kolom index 4)
             pageLength: 25,
             dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"Bf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-4"ip>',
             buttons: [{
                     extend: 'excelHtml5',
                     text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
-                    title: 'Laporan Data Pelanggan Simabeni Pangkah'
+                    title: 'Laporan Data Pelanggan Simabeni Pangkah',
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row c[r^="E"]', sheet).attr('s', '52');
+                    }
                 },
                 {
                     extend: 'pdfHtml5',
@@ -373,18 +374,22 @@ include '../components/header.php';
                     title: 'Laporan Data Pelanggan Simabeni Pangkah',
                     customize: function(doc) {
                         // PANGGIL FUNGSI KOP SURAT
-                        tambahkanKopSuratPdf(doc, 'LAPORAN DATA PELANGGAN (CRM)');
+                        tambahkanKopSuratPdf(doc, 'LAPORAN DATA PELANGGAN');
 
-                        doc.content[3].table.widths = ['10%', '35%', '15%', '20%', '20%'];
+                        doc.content[3].table.widths = ['10%', '20%', '35%', '15%', '20%'];
                         doc.defaultStyle.fontSize = 10;
 
+                        if (doc.content[3] && doc.content[3].table && doc.content[3].table.body) {
+                            doc.content[3].table.body.forEach(function(row) {
+                                if (row[0]) row[0].alignment = 'center';
+                                if (row[1]) row[1].alignment = 'center';
+                                if (row[3]) row[3].alignment = 'center';
+                                if (row[4]) row[4].alignment = 'right';
+                            });
+                        }
+
                         // --- TAMBAHAN TEMPAT TANDA TANGAN ---
-                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                        ];
-                        const tgl = new Date();
-                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
-                            .getMonth()] + ' ' + tgl.getFullYear();
+                        const tglFormat = 'Slawi, <?php echo !empty($filter_selesai) ? formatTanggalIndonesia($filter_selesai, false) : formatTanggalIndonesia(date('Y-m-d'), false); ?>';
 
                         doc.content.push({
                             margin: [0, 40, 0, 0],

@@ -262,7 +262,7 @@ include '../components/header.php';
                     <thead>
                         <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider">
                             <th class="p-4 font-semibold text-center">No</th>
-                            <th class="p-4 font-semibold text-center">Tanggal & Waktu</th>
+                            <th class="p-4 font-semibold text-center">Tanggal</th>
                             <th class="p-4 font-semibold">Keterangan / Transaksi</th>
                             <th class="p-4 font-semibold text-center">Pencatat</th>
                             <th class="p-4 font-semibold text-right">Masuk (Debit)</th>
@@ -293,7 +293,7 @@ include '../components/header.php';
                                 <tr class="hover:bg-blue-50/30 transition-colors">
                                     <td class="p-4 text-center text-gray-500"><?php echo $i++; ?></td>
                                     <td class="p-4 text-center text-gray-500">
-                                        <?php echo date('d/m/Y H:i', strtotime($row['waktu'])); ?>
+                                        <?php echo formatTanggalIndonesia($row['waktu'], false); ?>
                                     </td>
                                     <td class="p-4 font-bold text-gray-800">
                                         <?php
@@ -372,7 +372,13 @@ include '../components/header.php';
                     text: '<div class="flex items-center bg-green-500 text-white rounded-xl p-2 gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg> Export Excel</div>',
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
                     title: 'Laporan keuangan Simabeni Pangkah',
-                    footer: true // Agar total di bawah ikut terekspor
+                    footer: true, // Agar total di bawah ikut terekspor
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row c[r^="E"]', sheet).attr('s', '52');
+                        $('row c[r^="F"]', sheet).attr('s', '52');
+                        $('row c[r^="G"]', sheet).attr('s', '52');
+                    }
                 },
                 {
                     extend: 'pdfHtml5',
@@ -392,6 +398,17 @@ include '../components/header.php';
                         ];
                         doc.defaultStyle.fontSize = 10;
 
+                        if (doc.content[3] && doc.content[3].table && doc.content[3].table.body) {
+                            doc.content[3].table.body.forEach(function(row) {
+                                if (row[0]) row[0].alignment = 'center';
+                                if (row[1]) row[1].alignment = 'center';
+                                if (row[3]) row[3].alignment = 'center';
+                                if (row[4]) row[4].alignment = 'right';
+                                if (row[5]) row[5].alignment = 'right';
+                                if (row[6]) row[6].alignment = 'right';
+                            });
+                        }
+
                         // --- PERBAIKAN COLSPAN FOOTER ---
                         // Cari baris terakhir (footer) di dalam tabel
                         let lastRowIndex = doc.content[3].table.body.length - 1;
@@ -407,13 +424,7 @@ include '../components/header.php';
                         footerRow[3] = {};
 
                         // --- TAMBAHAN TEMPAT TANDA TANGAN ---
-                        // 1. Buat format tanggal bahasa Indonesia
-                        const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                        ];
-                        const tgl = new Date();
-                        const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
-                            .getMonth()] + ' ' + tgl.getFullYear();
+                        const tglFormat = 'Slawi, <?php echo !empty($filter_selesai) ? formatTanggalIndonesia($filter_selesai, false) : formatTanggalIndonesia(date('Y-m-d'), false); ?>';
 
                         // 2. Suntikkan layout kolom tanda tangan ke bagian paling bawah PDF
                         doc.content.push({

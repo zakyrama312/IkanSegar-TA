@@ -275,7 +275,8 @@ include '../components/header.php';
                 <table id="tabel-transaksi" class="w-full text-left whitespace-nowrap">
                     <thead>
                         <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                            <th class="p-4 font-semibold ">Tanggal & Waktu</th>
+                            <th class="p-4 font-semibold w-12 text-center">No</th>
+                            <th class="p-4 font-semibold ">Tanggal</th>
                             <th class="p-4 font-semibold">Kode TRX</th>
                             <th class="p-4 font-semibold">Kasir</th>
                             <th class="p-4 font-semibold text-right">Total Belanja</th>
@@ -285,24 +286,19 @@ include '../components/header.php';
                     </thead>
                     <tbody class="text-sm text-gray-700">
                         <?php if (!empty($data_transaksi_tampil)): ?>
+                            <?php $no = 1; ?>
                             <?php foreach ($data_transaksi_tampil as $trx):
                                 $detail_json = isset($semua_detail[$trx['id']]) ? json_encode($semua_detail[$trx['id']]) : '[]';
                                 $tgl_lengkap = date('d M Y, H:i', strtotime($trx['tanggal_waktu']));
                             ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+                                    <td class="p-4 text-center font-medium text-gray-600"><?php echo $no++; ?></td>
                                     <td class="p-4  text-gray-500" data-order="<?php echo strtotime($trx['tanggal_waktu']); ?>">
-                                        <span
-                                            class="font-bold text-gray-800 block"><?php echo date('d M Y', strtotime($trx['tanggal_waktu'])); ?></span>
-                                        <span
-                                            class="text-xs"><?php echo date('H:i:s', strtotime($trx['tanggal_waktu'])); ?></span>
+                                        <span class="font-bold text-gray-800 block"><?php echo formatTanggalIndonesia($trx['tanggal_waktu'], false); ?></span>
                                     </td>
                                     <td class="p-4 font-bold text-blue-600"><?php echo $trx['kode_transaksi']; ?></td>
-                                    <td class="p-4 flex items-center gap-2">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                                            <?php echo strtoupper(substr($trx['nama_kasir'] ? $trx['nama_kasir'] : '?', 0, 1)); ?>
-                                        </div>
-                                        <?php echo $trx['nama_kasir'] ? $trx['nama_kasir'] : '<i class="text-gray-400">Terhapus</i>'; ?>
+                                    <td class="p-4">
+                                        <?php echo $trx['nama_kasir'] ? htmlspecialchars($trx['nama_kasir']) : '<i class="text-gray-400">Terhapus</i>'; ?>
                                     </td>
                                     <td class="p-4 text-right font-bold text-emerald-600"
                                         data-order="<?php echo $trx['total_belanja']; ?>">
@@ -442,16 +438,16 @@ include '../components/header.php';
 
     <script>
         $(document).ready(function() {
-            $('#tabel-transaksi').DataTable({
+            var table = $('#tabel-transaksi').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
-                columnDefs: [{
-                    orderable: false,
-                    targets: 5
-                }],
+                columnDefs: [
+                    { orderable: false, searchable: false, targets: 0 },
+                    { orderable: false, targets: 6 }
+                ],
                 order: [
-                    [0, 'desc']
+                    [1, 'desc']
                 ],
                 pageLength: 10,
                 // Modifikasi DOM DataTables untuk menyisipkan tombol Export
@@ -462,8 +458,13 @@ include '../components/header.php';
                         className: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm text-sm',
                         title: 'Laporan Penjualan Simabeni Pangkah',
                         exportOptions: {
-                            columns: [0, 1, 2, 3, 4]
-                        } // Jangan ikut sertakan kolom ke-6 (Tombol Detail)
+                            columns: [0, 1, 2, 3, 4, 5]
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            // Kolom E adalah Total Belanja
+                            $('row c[r^="E"]', sheet).attr('s', '52');
+                        }
                     },
                     {
                         extend: 'pdfHtml5',
@@ -472,35 +473,39 @@ include '../components/header.php';
                         title: 'Laporan Penjualan Simabeni Pangkah',
                         footer: true,
                         exportOptions: {
-                            columns: [0, 1, 2, 3, 4]
+                            columns: [0, 1, 2, 3, 4, 5]
                         },
                         customize: function(doc) {
                             // PANGGIL FUNGSI KOP SURAT
                             tambahkanKopSuratPdf(doc, 'LAPORAN RIWAYAT TRANSAKSI PENJUALAN');
 
-                            doc.content[3].table.widths = ['10%', '25%', '25%', '20%', '20%'];
+                            doc.content[3].table.widths = ['5%', '15%', '25%', '20%', '20%', '15%'];
                             doc.defaultStyle.fontSize = 10;
+
+                            // Rata kanan untuk kolom Total Belanja (index 4) dan tengah untuk No (index 0) dan Status (index 5)
+                            if (doc.content[3] && doc.content[3].table && doc.content[3].table.body) {
+                                doc.content[3].table.body.forEach(function(row) {
+                                    if (row[0]) row[0].alignment = 'center';
+                                    if (row[4]) row[4].alignment = 'right';
+                                    if (row[5]) row[5].alignment = 'center';
+                                });
+                            }
 
                             // --- FIX COLSPAN JIKA ADA FOOTER TOTAL TRANSAKSI ---
                             let lastRowIndex = doc.content[3].table.body.length - 1;
                             let footerRow = doc.content[3].table.body[lastRowIndex];
                             if (footerRow && footerRow[0] && footerRow[0].text && footerRow[0].text
                                 .includes('Total')) {
-                                footerRow[0].colSpan = 4;
+                                footerRow[0].colSpan = 5;
                                 footerRow[0].alignment = 'right';
                                 footerRow[1] = {};
                                 footerRow[2] = {};
                                 footerRow[3] = {};
+                                footerRow[4] = {};
                             }
 
                             // --- TAMBAHAN TEMPAT TANDA TANGAN ---
-                            const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei',
-                                'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November',
-                                'Desember'
-                            ];
-                            const tgl = new Date();
-                            const tglFormat = 'Slawi, ' + tgl.getDate() + ' ' + bulanIndo[tgl
-                                .getMonth()] + ' ' + tgl.getFullYear();
+                            const tglFormat = 'Slawi, <?php echo !empty($filter_selesai) ? formatTanggalIndonesia($filter_selesai, false) : formatTanggalIndonesia(date('Y-m-d'), false); ?>';
 
                             doc.content.push({
                                 margin: [0, 40, 0, 0],
@@ -534,6 +539,13 @@ include '../components/header.php';
                     }
                 ]
             });
+
+            table.on('order.dt search.dt', function() {
+                let i = 1;
+                table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function(cell) {
+                    this.data(i++);
+                });
+            }).draw();
         });
 
         const formatRp = (angka) => {
