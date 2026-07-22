@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_ikan";
+$db   = "db_simabeni";
 
 // Melakukan koneksi ke MySQL
 $koneksi = mysqli_connect($host, $user, $pass, $db);

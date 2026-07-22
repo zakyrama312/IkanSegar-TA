@@ -272,7 +272,10 @@ $json_pelanggan = json_encode($data_pelanggan_array);
     ?>
         <div id="area-struk" class="hidden text-sm bg-white">
             <div class="text-center mb-4">
-                <h2 class="font-bold text-2xl uppercase">SimabeniPangkah.</h2>
+                <div class="flex justify-center items-center gap-2 mb-1">
+                    <img src="image/logo.png" alt="Logo" class="h-10 w-auto grayscale">
+                    <h2 class="font-bold text-2xl uppercase m-0">SimabeniPangkah.</h2>
+                </div>
                 <p class="text-xs">Sistem Penjualan & POS</p>
                 <div class="border-b border-dashed border-black mt-3 mb-3"></div>
             </div>

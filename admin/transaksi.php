@@ -350,7 +350,10 @@ include '../components/header.php';
 
                 <div class="overflow-y-auto flex-1 p-8 relative z-0">
                     <div class="text-center border-b-2 border-dashed border-gray-300 pb-6 mb-6">
-                        <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-1">SimabeniPangkah.</h2>
+                        <div class="flex justify-center items-center gap-2 mb-1">
+                            <img src="../image/logo.png" alt="Logo Pemkab Tegal" class="h-10 w-auto">
+                            <h2 class="text-2xl font-black text-gray-800 tracking-tight m-0">SimabeniPangkah.</h2>
+                        </div>
                         <p class="text-xs text-gray-500 font-medium">Benih Ikan Unggul Budidaya Sukses</p>
                         <p class="text-xs text-gray-400 mt-1">Jalan Raya Warungpring,Karanganyar,Kedungbanteng Kab.Tegal
                             52472</p>

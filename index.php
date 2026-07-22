@@ -44,7 +44,8 @@ $query_ikan = mysqli_query($koneksi, "SELECT * FROM ikan WHERE status_aktif = 1 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <!-- Logo -->
-                <a href="index.php" class="flex-shrink-0 flex items-center">
+                <a href="index.php" class="flex-shrink-0 flex items-center gap-2">
+                    <img src="image/logo.png" alt="Logo Pemkab Tegal" class="h-10 w-auto">
                     <span class="text-3xl font-extrabold text-blue-600 tracking-tighter">Simabeni<span
                             class="text-sky-400">Pangkah</span>.</span>
                 </a>
